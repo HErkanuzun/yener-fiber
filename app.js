@@ -265,6 +265,10 @@
   async function unlock(token, pass, remember){
     TOKEN = token.trim();
     const data = await ghGet();
+    try {
+      const rr = await fetch(`https://api.github.com/repos/${REPO}`, {headers:{Authorization:'Bearer '+TOKEN, Accept:'application/vnd.github+json'}, cache:'no-store'});
+      if (rr.ok){ const j = await rr.json(); if (j.permissions && j.permissions.push === false) throw {code:'readonly'}; }
+    } catch(e){ if (e && e.code==='readonly') throw e; }
     let priv;
     try { priv = await decryptPriv(data.private, pass); } catch { throw {code:'pass'}; }
     DATA = data; PRIV = priv; PASS = pass;
@@ -279,6 +283,7 @@
       e.code==='pass' ? 'Yönetici şifresi yanlış.' :
       e.code==='token' ? 'GitHub anahtarı geçersiz veya süresi dolmuş.' :
       e.code==='access' ? 'Bu GitHub anahtarının yener-fiber deposuna erişimi yok.' :
+      e.code==='readonly' ? 'Bu GitHub anahtarı sadece okuyabiliyor, kaydedemez. Yazma izni olan yeni bir anahtar oluştur.' :
       'Bağlanılamadı. İnternet bağlantını kontrol et.';
   }
   $('loginForm').addEventListener('submit', async e=>{
@@ -306,7 +311,8 @@
     } catch(e){
       PRIV = JSON.parse(backup); DATA = backupData;
       if (e.code==='conflict'){ toast('Kayıtlar başka bir yerden değişmiş. Son hâli yüklendi, işlemi tekrar yap.'); try { DATA = await ghGet(); PRIV = await decryptPriv(DATA.private, PASS); } catch {} }
-      else if (e.code==='token' || e.code==='access') toast('GitHub anahtarı geçersiz ya da yetkisi yok. Çıkış yapıp yeni anahtarla gir.');
+      else if (e.code==='token') toast('GitHub anahtarının süresi dolmuş ya da geçersiz. Sağ üstten Çıkış yapıp yeni anahtarla gir.');
+      else if (e.code==='access') toast('Bu GitHub anahtarının yazma izni yok. Sağ üstten Çıkış yapıp yazma izni olan yeni anahtarla gir.');
       else toast('Kaydedilemedi. İnternet bağlantını kontrol edip tekrar dene.');
       setSave('off','Son işlem kaydedilmedi');
       return false;
