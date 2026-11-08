@@ -15,7 +15,7 @@
 <main class="dashboard" id="top">
   <header class="topbar">
     <a class="brand" href="#top"><span class="brand-mark">Y<span>S</span></span><span>Yener Sitesi <b>Fiber Altyapı Yatırım Fonu</b></span></a>
-    <nav aria-label="Bölümler" class="hide-sm"><a href="#apartments">Evler</a><a href="#costs">Maliyet</a><a href="#finance">Tahsilat</a><a href="#activity">Geçmiş</a></nav>
+    <nav aria-label="Bölümler" class="hide-sm"><a href="#apartments">Evler</a><a href="#costs">Maliyet</a><a href="#analysis">Giderler</a><a href="#finance">Tahsilat</a><a href="#activity">Geçmiş</a></nav>
     <div class="top-actions"><a href="./" target="_blank" rel="noopener">Site sayfası ↗</a><button type="button" id="logout" hidden>Çıkış</button><span class="mode-chip">Yönetici</span></div>
   </header>
 
@@ -136,6 +136,30 @@
     <details class="items"><summary><span>A · Ana hat ve dağıtım (omurga)</span><b id="sumA"></b></summary><div class="table-wrap"><table class="cost-table"><thead><tr><th>Poz</th><th>İş kalemi</th><th class="num">Miktar</th><th class="num">Birim fiyat</th><th class="num">Toplam</th></tr></thead><tbody id="itemsA"></tbody><tfoot id="footA"></tfoot></table></div></details>
     <details class="items"><summary><span>B · Ev bağlantıları (17 ev, havai drop)</span><b id="sumB"></b></summary><div class="table-wrap"><table class="cost-table"><thead><tr><th>Poz</th><th>İş kalemi</th><th class="num">Miktar</th><th class="num">Birim fiyat</th><th class="num">Toplam</th></tr></thead><tbody id="itemsB"></tbody><tfoot id="footB"></tfoot></table></div></details>
     <p class="cost-note">Birim fiyatlar KDV hariçtir; KDV %20 ayrıca eklenir. Ödeme: %50 peşinat, %50 iş tesliminde. Teklif geçerliliği 17.11.2026.</p>
+  </section>
+
+  <section class="costs" id="analysis">
+    <div class="section-head"><div><p class="eyebrow">GİDER ANALİZİ · TEKLİFİN TAMAMI</p><h2>Para nereye gidiyor?</h2></div></div>
+    <div class="cost-cards four">
+      <div class="cost-card"><span>Malzeme · KDV hariç</span><strong id="gMal">—</strong><small id="gMalP"></small></div>
+      <div class="cost-card"><span>İşçilik · KDV hariç</span><strong id="gIsc">—</strong><small id="gIscP"></small></div>
+      <div class="cost-card"><span>KDV %20</span><strong id="gKdv">—</strong><small>Malzeme ve işçiliğin üzerine eklenir</small></div>
+      <div class="cost-card omurga"><span>Genel toplam · KDV dahil</span><strong id="gTop">—</strong><small id="gTopP"></small></div>
+    </div>
+    <div class="split-bar" id="gSplit" aria-hidden="true"></div>
+    <div class="site-legend split-legend"><span><i class="lg-yes"></i> Malzeme</span><span><i style="background:#e08a2e"></i> İşçilik</span><span><i style="background:#9aa4b5"></i> KDV</span></div>
+    <h3 class="cost-sub">Gider gruplarına göre</h3>
+    <div class="table-wrap"><table class="cost-table">
+      <thead><tr><th>Grup</th><th class="num">KDV hariç</th><th class="num">KDV dahil</th><th class="num">Pay</th><th class="bar-col">Toplam içindeki payı</th></tr></thead>
+      <tbody id="groupBody"></tbody>
+    </table></div>
+    <h3 class="cost-sub">Bütün kalemler · en pahalıdan en ucuza</h3>
+    <div class="table-wrap"><table class="cost-table">
+      <thead><tr><th>#</th><th>Poz</th><th>İş kalemi</th><th>Bölüm</th><th>Tür</th><th class="num">Miktar × birim fiyat</th><th class="num">KDV hariç</th><th class="num">KDV %20</th><th class="num">KDV dahil</th><th class="num">Pay</th><th class="bar-col"></th></tr></thead>
+      <tbody id="allItemsBody"></tbody>
+      <tfoot id="allItemsFoot"></tfoot>
+    </table></div>
+    <p class="cost-note">Pay, KDV hariç toplam (124.380,77 ₺) içindeki oranıdır. "Dahil" yazan kalemler (ölçüm, etiketleme, as-built) ayrıca ücretlendirilmemiştir.</p>
   </section>
 
   <section class="lower-grid" id="finance">

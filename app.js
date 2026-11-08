@@ -190,6 +190,36 @@
     $('itemsB').innerHTML = itemRows(T().B); $('footB').innerHTML = foot(NB);
     $('sumA').textContent = fmt2(OM); $('sumB').textContent = fmt2(BA);
   }
+
+  // Gider grupları (poz koduna göre)
+  const GROUP_OF = {'ANA-M01':'kablo','YEN-M01':'kablo','ANA-M02':'direk','ANA-M03':'direk','ANA-M04':'direk','ANA-M05':'direk','ANA-M06':'direk','ANA-İ01':'direk','ANA-İ02':'direk',
+    'ANA-M07':'fdk','ANA-M08':'fdk','ANA-M09':'fdk','ANA-İ07':'fdk','ANA-M10':'gergi','YEN-M02':'gergi','YEN-M03':'gergi','YEN-M04':'gergi','YEN-İ02':'gergi','YEN-İ03':'gergi',
+    'ANA-M11':'menhol','ANA-M12':'menhol','ANA-İ03':'menhol','ANA-İ04':'menhol','ANA-İ05':'menhol','ANA-İ06':'cekim','YEN-İ01':'cekim',
+    'YEN-M05':'cephe','YEN-M06':'cephe','YEN-İ04':'cephe','YEN-M07':'giris','YEN-İ05':'giris',
+    'ANA-M13':'ek','ANA-M14':'ek','ANA-İ08':'ek','YEN-M08':'ek','YEN-M09':'ek','YEN-İ06':'ek','ANA-İ09':'test','ANA-İ10':'test','YEN-İ07':'test','YEN-İ08':'test'};
+  const GROUP_NAME = {direk:'Direkler (malzeme + dikim/montaj)', cekim:'Kablo çekim işçiliği (ana hat + evlere)', kablo:'Fiber kablo (malzeme)', giris:'Ev girişleri (duvar delme, boru, izolasyon)',
+    gergi:'Gergi, klemp ve kancalar (malzeme + montaj)', cephe:'Cephe klipsleri (malzeme + montaj)', ek:'Füzyon ekleri ve etiketler', fdk:'Dağıtım kutuları ve splitter', menhol:'Menhol çıkışı ve yeraltı geçişi', test:'Ölçüm, test ve belgeler'};
+  function renderAnalysis(){
+    if (MODE!=='admin' || !PRIV) return;
+    const KDV = T().kdv;
+    const items = [...T().A.map(it=>({it, sec:'om'})), ...T().B.map(it=>({it, sec:'bag'}))].map(x=>({...x, net:lineTotal(x.it), isc:/-İ/.test(x.it[0])}));
+    const total = items.reduce((s,x)=>s+x.net,0), mal = items.filter(x=>!x.isc).reduce((s,x)=>s+x.net,0), isc = total-mal, kdv = total*KDV, gross = total+kdv;
+    const pct = v => total ? (v/total*100).toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%' : '—';
+    $('gMal').textContent = fmt2(mal); $('gMalP').textContent = `KDV hariç toplamın ${pct(mal)}'i · KDV dahil ${fmt2(mal*(1+KDV))}`;
+    $('gIsc').textContent = fmt2(isc); $('gIscP').textContent = `KDV hariç toplamın ${pct(isc)}'i · KDV dahil ${fmt2(isc*(1+KDV))}`;
+    $('gKdv').textContent = fmt2(kdv);
+    $('gTop').textContent = fmt2(gross); $('gTopP').textContent = `KDV hariç ${fmt2(total)}`;
+    $('gSplit').innerHTML = `<i class="s-mal" style="width:${mal/gross*100}%" title="Malzeme"></i><i class="s-isc" style="width:${isc/gross*100}%" title="İşçilik"></i><i class="s-kdv" style="width:${kdv/gross*100}%" title="KDV"></i>`;
+    const groups = {}; items.forEach(x=>{ const g = GROUP_OF[x.it[0]] || 'ek'; groups[g] = (groups[g]||0) + x.net; });
+    const gs = Object.entries(groups).sort((a,b)=>b[1]-a[1]); const gmax = gs.length ? gs[0][1] : 1;
+    $('groupBody').innerHTML = gs.map(([g,v])=>`<tr class="${v?'':'zero'}"><td>${esc(GROUP_NAME[g]||g)}</td><td class="num">${v?fmt2(v):'dahil'}</td><td class="num">${v?fmt2(v*(1+KDV)):'—'}</td><td class="num">${v?pct(v):'—'}</td><td><div class="bar-track"><i style="width:${v/gmax*100}%"></i></div></td></tr>`).join('');
+    const sorted = [...items].sort((a,b)=>b.net-a.net); const imax = sorted[0]?.net || 1;
+    $('allItemsBody').innerHTML = sorted.map((x,i)=>{ const it=x.it; return `<tr class="${x.net?'':'zero'}"><td>${i+1}</td><td class="pos">${esc(it[0])}</td><td>${esc(it[1])}</td>
+      <td><span class="tag ${x.sec}">${x.sec==='om'?'Omurga':'Ev bağlantısı'}</span></td><td><span class="tag ${x.isc?'isc':'mal'}">${x.isc?'İşçilik':'Malzeme'}</span></td>
+      <td class="num">${num(it[3])} ${esc(it[2])} × ${it[4]?fmt2(it[4]):'dahil'}</td><td class="num">${x.net?fmt2(x.net):'dahil'}</td><td class="num">${x.net?fmt2(x.net*KDV):'—'}</td><td class="num">${x.net?fmt2(x.net*(1+KDV)):'—'}</td>
+      <td class="num">${x.net?pct(x.net):'—'}</td><td><div class="bar-track"><i class="${x.isc?'isc':''}" style="width:${x.net/imax*100}%"></i></div></td></tr>`; }).join('');
+    $('allItemsFoot').innerHTML = `<tr><td></td><td></td><td>Toplam (${items.length} kalem)</td><td></td><td></td><td></td><td class="num">${fmt2(total)}</td><td class="num">${fmt2(kdv)}</td><td class="num">${fmt2(gross)}</td><td class="num">100%</td><td></td></tr>`;
+  }
   function suggestedFor(n, part){
     const c = counts(), was = house(n).p; let yes=c.yes, bb=c.bb;
     if (was==='yes') yes--; else if (was==='backbone') bb--;
@@ -205,7 +235,7 @@
 
   function renderAll(){
     if (!DATA) return;
-    renderMetrics(); renderPlan(); renderLists(); renderCosts();
+    renderMetrics(); renderPlan(); renderLists(); renderCosts(); renderAnalysis();
     if (MODE==='admin' && PRIV && document.activeElement!==$('setTitle')) $('setTitle').value = title();
   }
 
