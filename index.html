@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Yener Sitesi Fiber Katılım Durumu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&display=swap">
+<style id="pageStyle">
+/* Herkese açık, sadece okunur sürüm. Layout: FiberSite paneli — üst bar, karşılama, metrik kartlar, sayfaya sığan yerleşim planı, maliyet + tahsilat (yönetici), geçmiş (yönetici) */
+:root{
+  --paper:#f6f8fc;--ink:#172033;--blue:#315bce;--muted:#778399;--line:#e3e8f0;--white:#fff;
+  --label:#526078;--faint:#9aa4b5;--field:#fbfcfe;--danger:#b42335;--danger-line:#f2c9ce;
+  --h-no:#1d2230;--h-backbone:#d64545;--h-full:#2f9e62;--h-partial:#f1c232;--h-yes:#3d6fdc;--h-pending:#dfe4ec;
+  --h-ink-dark:#2a3242;--h-ink-light:#fff;
+  --roof-shadow:#b7a28d;--roof-base:#c9b59e;--roof-edge:#9a866f;--house-filtered:#f4f6f9;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+html{scroll-behavior:smooth;background:var(--paper)}
+body{background:var(--paper);min-height:100vh;color:var(--ink);margin:0;font-family:var(--sans);font-size:14px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+.brand-mark{background:var(--blue);color:#fff;letter-spacing:-.08em;border-radius:11px;place-items:center;width:34px;height:34px;font-size:14px;font-weight:800;display:grid;flex:none}
+.brand-mark span{margin-left:1px;font-size:10px;display:inline}
+.eyebrow{color:var(--blue);letter-spacing:.14em;margin:0 0 12px;font:700 10px/1.3 var(--mono)}
+.muted{color:var(--muted);line-height:1.65}
+.settings-form{gap:14px;margin-top:22px;display:grid}
+.settings-form label,.edit-modal label{color:var(--label);gap:8px;font-size:12px;font-weight:650;display:grid}
+.settings-form input,.settings-form select,.edit-modal input,.edit-modal select,.edit-modal textarea{border:1px solid var(--line);width:100%;height:46px;color:var(--ink);background:var(--field);border-radius:11px;outline:none;padding:0 13px}
+.settings-form input:focus,.settings-form select:focus,.edit-modal input:focus,.edit-modal select:focus,.edit-modal textarea:focus{border-color:var(--blue)}
+.primary{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:700;transition:transform .2s,box-shadow .2s;box-shadow:0 7px 18px #315bce24}
+.primary:hover{transform:translateY(-2px);box-shadow:0 12px 24px #315bce30}
+.primary:disabled{opacity:.6;cursor:wait;transform:none}
+
+.dashboard{max-width:1440px;margin:auto;padding-left:max(48px,env(safe-area-inset-left,0px));padding-right:max(48px,env(safe-area-inset-right,0px))}
+.topbar{border-bottom:1px solid var(--line);align-items:center;gap:34px;min-height:76px;display:flex}
+.brand{color:var(--ink);letter-spacing:-.03em;align-items:center;gap:10px;font-size:15px;font-weight:750;text-decoration:none;display:flex;min-width:0;line-height:1.2}
+.brand b{color:var(--blue)}
+.topbar nav{gap:28px;margin-left:auto;display:flex}
+.topbar nav a{color:var(--muted);font-size:12px;text-decoration:none}
+.topbar nav a:hover{color:var(--blue)}
+.mode-chip{color:var(--blue);font-size:12px;font-weight:650;white-space:nowrap}
+
+.publish-bar{margin-top:18px;border:1px solid #f0d78a;background:#fff8e1;border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#6b5512}
+.publish-bar button{background:#6b5512;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap}
+
+.welcome{justify-content:space-between;align-items:end;gap:24px;padding:58px 0 38px;display:flex}
+.welcome h1{letter-spacing:-.065em;margin:0 0 12px;font-size:clamp(32px,4vw,54px);text-wrap:balance;line-height:1.05}
+.welcome .muted{margin:0;font-size:14px;max-width:62ch}
+.welcome-side{border:1px solid var(--line);min-width:180px;color:var(--muted);background:#fff;border-radius:16px;padding:17px 20px;font-size:11px}
+.welcome-side strong{color:var(--ink);margin-top:10px;font-size:22px;display:block;font-variant-numeric:tabular-nums}
+.welcome-side small{font-size:10px}
+.live-dot{background:#36a779;border-radius:50%;width:7px;height:7px;margin-right:7px;display:inline-block}
+.live-dot.wait{background:#d6a531}
+.live-dot.off{background:#b9c1cf}
+
+.metric-grid{grid-template-columns:repeat(4,1fr);gap:14px;display:grid}
+.metric{border:1px solid var(--line);background:#fff;border-radius:18px;flex-direction:column;justify-content:space-between;gap:10px;min-height:146px;padding:22px 24px;display:flex;min-width:0}
+.metric span,.metric>small{color:var(--muted);font-size:11px}
+.metric strong{letter-spacing:-.06em;font-size:29px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.metric strong small{color:var(--muted);font-size:13px;letter-spacing:0}
+.metric strong span{font-size:inherit;color:inherit}
+.metric.featured{background:#edf2ff;border-color:#dce5ff}
+.meter{background:#d9e2f7;border-radius:9px;height:4px;overflow:hidden}
+.meter i{background:var(--blue);border-radius:9px;height:100%;transition:width .5s;display:block}
+
+.section-head{justify-content:space-between;align-items:end;margin:64px 0 18px;display:flex}
+.section-head h2,.lower-grid h2,.history h2{letter-spacing:-.055em;margin:0;font-size:27px}
+.tools{gap:8px;display:flex}
+.search,.tools select{border:1px solid var(--line);height:40px;color:var(--ink);background:#fff;border-radius:10px;padding:0 12px;font-size:11px}
+
+.site-plan-wrap{border:1px solid var(--line);background:linear-gradient(#f7f9fc,#eef2f7);border-radius:20px;margin:8px 0 10px;padding:22px}
+.site-plan-head{justify-content:space-between;align-items:end;gap:18px;display:flex}
+.site-plan-head h3{letter-spacing:-.045em;margin:0;font-size:21px;font-variant-numeric:tabular-nums}
+.site-plan-head p:not(.eyebrow){color:var(--muted);margin:7px 0 0;font-size:12px}
+.site-legend{color:#4f5b70;flex-wrap:wrap;gap:12px;font-size:11px;display:flex;max-width:520px;justify-content:flex-end}
+.site-legend span{white-space:nowrap;align-items:center;gap:6px;display:flex}
+.site-legend i{border-radius:3px;width:12px;height:12px;display:inline-block}
+.lg-full{background:var(--h-full)}.lg-partial{background:var(--h-partial)}.lg-yes{background:var(--h-yes)}.lg-backbone{background:var(--h-backbone)}.lg-no{background:var(--h-no)}.lg-pending{background:var(--h-pending);box-shadow:inset 0 0 0 1px #c9d0db}
+.site-plan{width:100%;max-width:760px;height:auto;margin:14px auto 0;display:block}
+.site-plan polygon{cursor:pointer;stroke:#fff;stroke-width:4px;transition:filter .15s}
+.site-plan polygon:hover,.site-plan polygon:focus-visible{filter:brightness(.9);stroke:var(--ink);stroke-width:5px;outline:none}
+.roof-label{pointer-events:none;font-size:20px;font-weight:800;font-family:var(--sans)}
+.building-label{letter-spacing:1px;fill:#8490a2;pointer-events:none;font-size:11px;font-weight:700;font-family:var(--sans)}
+.site-plan-foot{text-align:center;color:#8994a6;margin-top:10px;font-size:10px}
+
+.lower-grid{grid-template-columns:1fr 1fr;gap:16px;margin-top:48px;display:grid}
+.finance-panel,.payment-panel{border:1px solid var(--line);background:#fff;border-radius:20px;padding:28px;min-width:0}
+.finance-panel>.muted,.payment-panel>.muted{margin:8px 0;font-size:12px}
+.settings-form .primary{justify-self:start}
+.finance-total{color:var(--muted);border-top:1px solid #edf0f5;justify-content:space-between;gap:12px;padding:13px 0;font-size:12px;display:flex}
+.finance-totals{margin-top:22px}
+.finance-total strong{color:var(--ink);font-size:14px;font-variant-numeric:tabular-nums}
+
+.history{margin:62px 0 40px}
+.history .section-head{margin:0 0 20px}
+.history ul{border-top:1px solid var(--line);margin:0;padding:0;list-style:none}
+.history li{border-bottom:1px solid var(--line);color:var(--label);align-items:center;gap:12px;padding:15px 4px;font-size:12px;display:flex}
+.history time{color:var(--faint);margin-left:auto;font-size:10px;white-space:nowrap}
+.history-dot{background:var(--blue);border-radius:50%;width:7px;height:7px;flex:none}
+.payments-history{border-top:1px solid var(--line);margin-top:28px;padding-top:22px}
+.payments-history h3{letter-spacing:-.04em;margin:0 0 14px;font-size:17px}
+.payment-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;display:grid}
+.payment-list>div{border:1px solid var(--line);background:#fff;border-radius:12px;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;display:flex}
+.payment-list b{font-size:11px;display:block}
+.payment-list small{color:var(--muted);margin-top:4px;font-size:9px;display:block}
+.payment-list strong{white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums}
+
+.costs{margin-top:64px}
+.costs .section-head{margin:0 0 18px}
+.cost-cards{grid-template-columns:repeat(3,1fr);gap:14px;display:grid}
+.cost-card{border:1px solid var(--line);background:#fff;border-radius:18px;padding:20px 22px;display:grid;gap:6px;min-width:0}
+.cost-card span{color:var(--muted);font-size:11px}
+.cost-card strong{letter-spacing:-.05em;font-size:26px;font-variant-numeric:tabular-nums}
+.cost-card small{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.cost-card.omurga{border-color:#f3c9c9;background:#fff6f6}.cost-card.omurga strong{color:#b23434}
+.cost-card.bag{border-color:#cfdcfb;background:#f4f7ff}.cost-card.bag strong{color:var(--blue)}
+.calc{margin-top:14px;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px;display:grid}
+.calc-box{border:1px solid var(--line);background:#fff;border-radius:18px;padding:22px;min-width:0}
+.calc-box h3{margin:0 0 4px;font-size:17px;letter-spacing:-.04em}
+.calc-box>p{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.55}
+.calc-inputs{display:grid;gap:12px}
+.calc-inputs label{display:grid;gap:6px;color:var(--label);font-size:12px;font-weight:650}
+.calc-inputs input{border:1px solid var(--line);height:44px;border-radius:11px;padding:0 13px;background:var(--field);color:var(--ink);font-variant-numeric:tabular-nums}
+.linkish{background:0 0;border:0;color:var(--blue);font-size:12px;font-weight:650;padding:0;justify-self:start}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-top:1px solid #edf0f5;font-size:12px;color:var(--muted)}
+.price-row:first-of-type{border-top:0;padding-top:0}
+.price-row strong{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price-row.big strong{font-size:22px;letter-spacing:-.04em}
+.price-row.big.red strong{color:#b23434}
+.next-hint{margin-top:12px;border-radius:12px;background:#eef8f2;color:#1e7a4f;padding:12px 14px;font-size:12px;line-height:1.5}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.cost-table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.cost-table th{background:#f7f9fc;color:var(--label);font-weight:650;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.cost-table td{padding:9px 12px;border-bottom:1px solid #eef1f6;vertical-align:top}
+.cost-table td.num,.cost-table th.num{text-align:right;white-space:nowrap}
+.cost-table td.pos{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.cost-table tr.cur td{background:#edf2ff;font-weight:700}
+.cost-table tr.next td{background:#eef8f2}
+.cost-table tfoot td{font-weight:700;background:#f7f9fc;border-bottom:0}
+.cost-sub{margin:26px 0 10px;font-size:15px;letter-spacing:-.03em}
+.cost-note{color:var(--muted);font-size:11px;line-height:1.55;margin:8px 0 0}
+details.items{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+details.items summary{cursor:pointer;padding:14px 16px;font-weight:650;font-size:13px;display:flex;justify-content:space-between;gap:12px}
+details.items summary b{font-variant-numeric:tabular-nums;white-space:nowrap}
+details.items .table-wrap{border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px}
+.suggest{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:var(--muted);margin-top:-6px}
+.viewer-note{margin:28px 0 40px;color:var(--muted);font-size:12px;line-height:1.6}
+footer{border-top:1px solid var(--line);color:var(--faint);letter-spacing:.08em;justify-content:space-between;gap:12px;padding:26px 0 36px;font:10px var(--mono);display:flex}
+
+.modal-backdrop{z-index:20;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);background:#17203370;place-items:center;padding:20px;display:grid;position:fixed;inset:0}
+.edit-modal{background:#fff;border-radius:22px;gap:15px;width:min(460px,100%);max-height:90dvh;padding:32px;display:grid;position:relative;overflow:auto;box-shadow:0 30px 100px #101c3333}
+.edit-modal h2{letter-spacing:-.05em;margin:0 0 4px;font-size:28px;padding-right:24px}
+.edit-modal textarea{resize:vertical;height:90px;padding:12px}
+.modal-close{color:var(--muted);background:0 0;border:0;font-size:24px;position:absolute;top:16px;right:20px;line-height:1}
+.status-rows{display:grid;gap:10px}
+.status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--label)}
+.status-row b{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:13px;text-align:right}
+.status-row i{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+.toast{z-index:30;background:#fff;border:1px solid var(--danger-line);color:var(--danger);font-size:12px;border-radius:12px;padding:14px 18px;position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:calc(24px + env(safe-area-inset-right,0px));max-width:min(360px,calc(100vw - 48px));box-shadow:0 10px 40px #17203320}
+.toast.ok{border-color:#bfe6cf;color:#1e7a4f}
+
+@media (max-width:1000px){
+  .dashboard{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .lower-grid{grid-template-columns:1fr}
+  .welcome{align-items:start;gap:20px}
+  .welcome-side{min-width:140px}
+  .topbar{gap:18px}.topbar nav{gap:14px}
+  .site-plan-head{display:block}
+  .site-legend{justify-content:flex-start;margin-top:14px;max-width:none}
+  .cost-cards{grid-template-columns:1fr}
+  .calc{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .dashboard{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .topbar{gap:10px;min-height:64px;padding-block:10px}
+  .brand{font-size:13px}
+  .topbar nav{display:none}
+  .mode-chip{margin-left:auto;font-size:10px}
+  .welcome{padding:32px 0 22px;display:block}
+  .welcome-side{margin-top:22px}
+  .metric-grid{gap:9px}
+  .metric{min-height:128px;padding:16px}
+  .metric strong{font-size:22px}
+  .section-head{margin:44px 0 14px;display:block}
+  .tools{margin-top:16px}
+  .tools>*{flex:1;min-width:0}
+  .lower-grid{margin-top:32px}
+  .finance-panel,.payment-panel{padding:22px}
+  .history li{flex-wrap:wrap;align-items:flex-start}
+  .history time{width:100%;margin-left:19px}
+  .history li span:nth-child(2){max-width:calc(100% - 30px)}
+  .payment-list{grid-template-columns:1fr}
+  footer{font-size:8px;flex-direction:column}
+  .site-plan-wrap{padding:16px 10px}
+  .site-legend{gap:9px 12px}
+  .publish-bar{flex-direction:column;align-items:stretch}
+}
+</style>
+<template id="appTpl">
+<main class="dashboard" id="top">
+  <header class="topbar">
+    <a class="brand" href="#top"><span class="brand-mark">Y<span>S</span></span><span>Yener Sitesi <b>Fiber Altyapı Yatırım Fonu</b></span></a>
+    <nav aria-label="Bölümler" id="nav"><a href="#apartments">Evler</a></nav>
+    <span class="mode-chip" id="modeChip">Görüntüleme</span>
+  </header>
+
+  <section class="welcome">
+    <div>
+      <p class="eyebrow">BİNA ALTYAPI YÖNETİMİ</p>
+      <h1 id="projectTitle">Yener Sitesi Fiber Altyapı Yatırım Fonu</h1>
+      <p class="muted" id="welcomeText">28 hanenin fiber altyapıya katılım durumu. Bir haneye dokunarak durumunu görebilirsiniz.</p>
+    </div>
+    <div class="welcome-side" aria-live="polite">
+      <span class="live-dot" id="liveDot"></span><span id="liveText">Son güncelleme</span>
+      <strong id="updatedAt">—</strong>
+      <small>28 hane takip ediliyor</small>
+    </div>
+  </section>
+
+  <section class="metric-grid" aria-label="Özet">
+    <article class="metric featured">
+      <span>Katılacak ev</span>
+      <strong><span id="mJoin">0</span><small> / 28</small></strong>
+      <div class="meter"><i id="mMeter"></i></div>
+      <small id="mJoinNote">0 tam bağlantı · 0 sadece omurga</small>
+    </article>
+    <article class="metric"><span>Ödeme toplamı</span><strong id="mPaid">₺0</strong><small>Şu ana kadar toplanan</small></article>
+    <article class="metric"><span>Beklenen katkı</span><strong id="mExpected">₺0</strong><small>Katılacak evlerden</small></article>
+    <article class="metric"><span>Karar bekleyen</span><strong id="mPending">28</strong><small><span id="mNo">0</span> ev katılmayacak</small></article>
+  </section>
+
+  <section class="section-head" id="apartments">
+    <div><p class="eyebrow">EV KAYITLARI</p><h2>Evlerin durumu</h2></div>
+    <div class="tools">
+      <input id="search" aria-label="Ev ara" class="search" placeholder="Kapı no ara">
+      <select id="filter" aria-label="Duruma göre süz">
+        <option value="all">Tüm evler</option>
+        <option value="yes">Katılacak</option>
+        <option value="backbone">Sadece omurga</option>
+        <option value="pending">Karar bekliyor</option>
+        <option value="no">Katılmayacak</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="site-plan-wrap">
+    <div class="site-plan-head">
+      <div>
+        <p class="eyebrow">YERLEŞİM PLANI</p>
+        <h3>14 bina · 28 müstakil ev</h3>
+        <p>Binanın sol veya sağ yarısına dokunarak o hanenin kaydını aç.</p>
+      </div>
+      <div class="site-legend">
+        <span><i class="lg-full"></i> Ödemesi tamam</span>
+        <span><i class="lg-partial"></i> Kısmi ödeme</span>
+        <span><i class="lg-yes"></i> Katılacak, ödeme yok</span>
+        <span><i class="lg-backbone"></i> Sadece omurga</span>
+        <span><i class="lg-no"></i> Katılmayacak</span>
+        <span><i class="lg-pending"></i> Karar bekliyor</span>
+      </div>
+    </div>
+    <svg class="site-plan" id="sitePlan" viewBox="90 10 640 1290" role="group" aria-label="14 yapı ve 28 hanenin yerleşim planı"></svg>
+    <div class="site-plan-foot">Kapı numaraları sol sütundan başlar, her sütunda aşağıdan yukarı artar · Sağ en üst ev 28</div>
+  </section>
+
+  <p class="viewer-note" data-viewer>Bu sayfa site yönetimi tarafından güncellenir. Hanelerin ödeme tutarları burada gösterilmez; sorularınız için site yönetimine başvurabilirsiniz.</p>
+
+  <footer><span>YENER SİTESİ FİBER ALTYAPI YATIRIM FONU</span><span>Yeniköy · Menteşe · Muğla</span></footer>
+</main>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Kapat">×</button>
+    <p class="eyebrow" id="editEyebrow">EV KAYDI</p>
+    <h2 id="editTitle"></h2>
+    <div class="status-rows" id="viewRows"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+</template>
+<div id="app"></div>
+<script type="application/json" id="fund-data">{"v":1,"title":"Yener Sitesi Fiber Altyapı Yatırım Fonu","total_cost":132328,"paid":38380,"expected":56689,"houses":{"1":{"p":"yes","pay":"none"},"2":{"p":"yes","pay":"none"},"3":{"p":"backbone","pay":"none"},"4":{"p":"yes","pay":"none"},"5":{"p":"no","pay":"none"},"6":{"p":"backbone","pay":"none"},"7":{"p":"no","pay":"none"},"8":{"p":"backbone","pay":"none"},"9":{"p":"yes","pay":"partial"},"10":{"p":"yes","pay":"none"},"11":{"p":"no","pay":"none"},"12":{"p":"no","pay":"none"},"14":{"p":"no","pay":"none"},"16":{"p":"yes","pay":"none"},"17":{"p":"no","pay":"none"},"18":{"p":"yes","pay":"partial"},"19":{"p":"yes","pay":"none"},"20":{"p":"yes","pay":"none"},"22":{"p":"no","pay":"none"},"23":{"p":"pending","pay":"full"},"24":{"p":"yes","pay":"full"},"25":{"p":"yes","pay":"none"},"26":{"p":"pending","pay":"full"},"27":{"p":"yes","pay":"none"},"28":{"p":"yes","pay":"partial"}},"updated":"2026-11-08T15:03:16.241Z"}</script>
+<script>
+(() => {
+  const SCRIPT_SRC = document.currentScript.textContent;
+  const STYLE_SRC = document.getElementById('pageStyle').textContent;
+  const TPL_SRC = document.getElementById('appTpl').innerHTML;
+  const HEAD_BITS = '<title>Yener Sitesi Fiber Altyapı Yatırım Fonu</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&display=swap">';
+  const SKELETON_STYLE = ':root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}';
+  let PUB = {v:1,title:'Yener Sitesi Fiber Altyapı Yatırım Fonu',total_cost:0,paid:0,expected:0,updated:null,houses:{}};
+  try { PUB = Object.assign(PUB, JSON.parse(document.getElementById('fund-data').textContent)); } catch {}
+  const PUB_JSON = JSON.stringify(PUB);
+
+  document.getElementById('app').replaceChildren(document.getElementById('appTpl').content.cloneNode(true));
+
+  const $ = id => document.getElementById(id);
+  const fmt = n => new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(n||0);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const today = () => new Date().toISOString().slice(0,10);
+
+  const BUILDINGS = [{x:545,y:24,w:165,h:96,r:-1.5},{x:110,y:24,w:165,h:96,r:0},{x:327,y:167,w:165,h:96,r:0},{x:545,y:310,w:165,h:96,r:1.5},{x:110,y:310,w:165,h:96,r:-1.5},{x:327,y:453,w:165,h:96,r:-1.5},{x:545,y:596,w:165,h:96,r:0},{x:110,y:596,w:165,h:96,r:1.5},{x:327,y:739,w:165,h:96,r:1.5},{x:545,y:882,w:165,h:96,r:-1.5},{x:110,y:882,w:165,h:96,r:0},{x:327,y:1025,w:165,h:96,r:0},{x:545,y:1168,w:165,h:96,r:1.5},{x:110,y:1168,w:165,h:96,r:-1.5}];
+  // Kapı numarası: sol sütun aşağıdan yukarı (1–10), orta sütun aşağıdan yukarı (11–18), sağ sütun aşağıdan yukarı (19–28); her binada soldaki ev tek numara
+  BUILDINGS.sort((a,b)=> a.x-b.x || b.y-a.y);
+  const code = n => String(n);
+  const aptLabel = n => `Kapı No ${n}`;
+
+  const P_LABEL = {pending:'Karar bekliyor', yes:'Katılacak', backbone:'Sadece omurga maliyetine katılacak', no:'Katılmayacak'};
+  const PAY_LABEL = {full:'Ödemesi tamamlandı', partial:'Ödemenin bir kısmı yapıldı', none:'Henüz ödeme yok'};
+  const payCat = r => { const p=+r.paid_amount||0, e=+r.expected_amount||0; return p<=0 ? 'none' : (p>=e ? 'full' : 'partial'); };
+  const fillOf = (p,pay) => p==='no' ? 'var(--h-no)' : p==='backbone' ? 'var(--h-backbone)'
+    : pay==='full' ? 'var(--h-full)' : pay==='partial' ? 'var(--h-partial)' : p==='yes' ? 'var(--h-yes)' : 'var(--h-pending)';
+  const inkOf = (p,pay) => (p!=='no' && p!=='backbone' && (pay==='partial' || (pay==='none' && p!=='yes'))) ? 'var(--h-ink-dark)' : 'var(--h-ink-light)';
+  const payLegend = pay => pay==='full' ? 'var(--h-full)' : pay==='partial' ? 'var(--h-partial)' : 'var(--h-pending)';
+
+  // ABLINK teklifi AB-2026-011-002 (04.11.2026) — birim fiyatlar KDV hariç
+  const KDV = 0.20;
+  const ITEMS_A = [], ITEMS_B = [];
+  const lineTotal = it => Math.round(it[3]*it[4]*100)/100;
+  const NET_A = ITEMS_A.reduce((s,it)=>s+lineTotal(it),0);
+  const NET_B = ITEMS_B.reduce((s,it)=>s+lineTotal(it),0);
+  const OMURGA = NET_A*(1+KDV), BAG_ALL = NET_B*(1+KDV), BAG_HOUSES = 17;
+  const BAG_EACH = BAG_ALL/BAG_HOUSES;
+  // Metreye bağlı kalemler (drop kablo + çekimi); geri kalanı ev başına sabit
+  const PER_M = 5.63 + 18.75, DROP_M = 980;
+  const FIXED_EACH = (NET_B - DROP_M*PER_M)/BAG_HOUSES;
+  const fmt2 = n => new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+  const num = n => new Intl.NumberFormat('tr-TR').format(n);
+
+  const ui = { mode:'viewer', q:'', filter:'all', busy:false, db:null, art:null, editing:null, settingsDirty:false };
+  const own = { settings:null, apts:{}, payments:[], activity:[], loaded:false };
+
+  // ---------- data access (owner: full records; viewer: published statuses) ----------
+  function ownerRec(n){ const r = own.apts[n]; return r ? {participation:'pending',expected_amount:0,paid_amount:0,note:'',...r} : {participation:'pending',expected_amount:0,paid_amount:0,note:''}; }
+  function house(n){
+    if (ui.mode==='owner'){ const r = ownerRec(n); return {n, p:r.participation, pay:payCat(r), rec:r}; }
+    const h = PUB.houses[n] || {}; return {n, p:h.p||'pending', pay:h.pay||'none'};
+  }
+  function settingsNow(){
+    if (ui.mode==='owner' && own.settings) return own.settings;
+    return {project_title:PUB.title};
+  }
+  function totals(){
+    if (ui.mode!=='owner') return {paid:+PUB.paid||0, expected:+PUB.expected||0};
+    let paid=0, expected=0;
+    for (let n=1;n<=28;n++){ const r=ownerRec(n); paid += +r.paid_amount||0; if (r.participation==='yes'||r.participation==='backbone') expected += +r.expected_amount||0; }
+    return {paid, expected};
+  }
+  function buildPublic(){
+    const houses = {};
+    for (let n=1;n<=28;n++){ const h=house(n); if (h.p!=='pending' || h.pay!=='none') houses[n] = {p:h.p, pay:h.pay}; }
+    const s = settingsNow(), t = totals();
+    return {v:1, title:s.project_title||'Yener Sitesi Fiber Altyapı Yatırım Fonu', total_cost:Math.round(currentProject()), paid:t.paid, expected:t.expected, houses};
+  }
+  function counts(){
+    let yes=0, bb=0; for (let n=1;n<=28;n++){ const h=house(n); if(h.p==='yes') yes++; else if(h.p==='backbone') bb++; }
+    return {yes, bb};
+  }
+  function costFor(yes, bb){
+    const N = yes+bb;
+    const share = N>0 ? OMURGA/N : 0;
+    return {N, share, full:share+BAG_EACH, bb:share, project: N>0 ? OMURGA + BAG_EACH*yes : 0};
+  }
+  function currentProject(){ const c=counts(); return costFor(c.yes,c.bb).project; }
+  const sameStatus = (a,b) => JSON.stringify({...a,updated:null}) === JSON.stringify({...b,updated:null});
+
+  // ---------- toast ----------
+  let toastTimer;
+  function toast(msg, ok){ const t=$('toast'); t.textContent=msg; t.classList.toggle('ok',!!ok); t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.hidden=true},ok?2600:6000); }
+
+  // ---------- render ----------
+  function visible(h){ return (ui.filter==='all'||h.p===ui.filter) && (!ui.q || String(h.n)===ui.q); }
+
+  function renderMetrics(){
+    const hs = Array.from({length:28},(_,i)=>house(i+1));
+    const yes = hs.filter(h=>h.p==='yes').length, bb = hs.filter(h=>h.p==='backbone').length, no = hs.filter(h=>h.p==='no').length;
+    const t = totals(), s = settingsNow();
+    $('mJoin').textContent = yes+bb; $('mMeter').style.width = `${(yes+bb)/28*100}%`;
+    $('mJoinNote').textContent = `${yes} tam bağlantı · ${bb} sadece omurga`;
+    $('mPaid').textContent = fmt(t.paid); $('mExpected').textContent = fmt(t.expected);
+    $('mPending').textContent = 28-yes-bb-no; $('mNo').textContent = no;
+        
+    $('projectTitle').textContent = s.project_title || 'Yener Sitesi Fiber Altyapı Yatırım Fonu';
+    $('updatedAt').textContent = PUB.updated ? new Date(PUB.updated).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}) : 'Henüz yok';
+  }
+
+  function renderPlan(){
+    $('sitePlan').innerHTML = BUILDINGS.map((b,t)=>{
+      const L=house(t*2+1), R=house(t*2+2), u=visible(L), d=visible(R);
+      const f = `M 8 5 L ${b.w-12} 0 L ${b.w} 14 L ${b.w-5} ${b.h-8} L ${b.w-18} ${b.h} L 0 ${b.h-4} Z`;
+      const half = (h,on,pts) => `<polygon points="${pts}" fill="${on?fillOf(h.p,h.pay):'var(--house-filtered)'}" pointer-events="${on?'auto':'none'}" stroke="#fff" stroke-width="3" role="button" tabindex="${on?0:-1}" aria-label="${esc(aptLabel(h.n)+': '+P_LABEL[h.p])}" data-apt="${h.n}"></polygon>`;
+      const lab = (h,on,x) => `<text x="${x}" y="${b.h/2+7}" text-anchor="middle" class="roof-label" fill="${on?inkOf(h.p,h.pay):'#3c4658'}" opacity="${on?1:.25}">${code(h.n)}</text>`;
+      return `<g transform="translate(${b.x} ${b.y}) rotate(${b.r} ${b.w/2} ${b.h/2})">
+        <path d="${f}" fill="var(--roof-shadow)" opacity=".35" transform="translate(4 5)"></path>
+        <path d="${f}" fill="var(--roof-base)" stroke="var(--roof-edge)" stroke-width="2"></path>
+        <clipPath id="roof-${t}"><path d="${f}"></path></clipPath>
+        <g clip-path="url(#roof-${t})">
+          ${half(L,u,`0,0 ${b.w/2},0 ${b.w/2},${b.h} 0,${b.h}`)}
+          ${half(R,d,`${b.w/2},0 ${b.w},0 ${b.w},${b.h} ${b.w/2},${b.h}`)}
+        </g>
+        <path d="M ${b.w/2} 4 L ${b.w/2} ${b.h-3}" stroke="#fff" stroke-width="3" pointer-events="none"></path>
+        ${lab(L,u,b.w/4)}${lab(R,d,b.w*.75)}
+        <text x="${b.w/2}" y="${b.h+20}" text-anchor="middle" class="building-label">${t+1}. BİNA</text>
+      </g>`;
+    }).join('');
+  }
+
+  function renderLists(){
+    if (ui.mode!=='owner') return;
+    const act = own.activity;
+    $('activityList').innerHTML = act.length===0 ? '<p class="muted">Henüz işlem kaydı yok.</p>'
+      : '<ul>' + act.map(e=>`<li><span class="history-dot"></span><span>${esc(e.message)}</span><time>${esc(new Date(e.created_at).toLocaleString('tr-TR'))}</time></li>`).join('') + '</ul>';
+    const pays = own.payments;
+    $('paymentList').innerHTML = pays.length===0 ? '<p class="muted">Henüz ödeme kaydı eklenmedi.</p>'
+      : '<div class="payment-list">' + pays.map(p=>`<div><span><b>${esc(aptLabel(p.apartment_no))}</b><small>${esc(p.paid_on||'')}${p.note?' · '+esc(p.note):''}</small></span><strong>${esc(fmt(p.amount))}</strong></div>`).join('') + '</div>';
+  }
+
+  function renderSettingsForm(){
+    if (ui.settingsDirty || ui.mode!=='owner') return;
+    const s = settingsNow();
+    $('setTitle').value = s.project_title || '';
+  }
+
+  function renderPublishBar(){
+    
+  }
+
+  function renderMode(){
+    const owner = ui.mode==='owner';
+    document.querySelectorAll('[data-owner]').forEach(el=>{ el.hidden = !owner; });
+    document.querySelectorAll('[data-viewer]').forEach(el=>{ el.hidden = owner; });
+    $('modeChip').textContent = owner ? 'Yönetici' : 'Görüntüleme';
+    $('welcomeText').textContent = owner
+      ? 'Haneye dokunarak katılımını ve ödemesini düzenle. Kaydettiğinde ev durumları paylaştığın linke de yansır.'
+      : '28 hanenin fiber altyapıya katılım durumu. Bir haneye dokunarak durumunu görebilirsiniz.';
+  }
+
+  const calc = { yes:null, bb:null };   // null = evlerin güncel durumunu kullan
+  function calcCounts(){
+    const c = counts();
+    const auto = (c.yes+c.bb)===0 ? {yes:BAG_HOUSES, bb:0, fromTeklif:true} : {...c, fromTeklif:false};
+    return { yes: calc.yes ?? auto.yes, bb: calc.bb ?? auto.bb, manual: calc.yes!=null || calc.bb!=null, fromTeklif:auto.fromTeklif, cur:c };
+  }
+  function renderCosts(){
+    if (ui.mode!=='owner') return;
+    $('cOmurga').textContent = fmt2(OMURGA); $('cOmurgaNet').textContent = `KDV hariç ${fmt2(NET_A)} · 24 kalem`;
+    $('cBag').textContent = fmt2(BAG_ALL); $('cBagNet').textContent = `KDV hariç ${fmt2(NET_B)} · ev başı ort. ${fmt2(BAG_EACH)}`;
+    $('cTotal').textContent = fmt2(OMURGA+BAG_ALL); $('cTotalNet').textContent = `KDV hariç ${fmt2(NET_A+NET_B)} · %50 peşinat ${fmt2((OMURGA+BAG_ALL)/2)}`;
+    const k = calcCounts();
+    if (document.activeElement!==$('calcYes')) $('calcYes').value = k.yes;
+    if (document.activeElement!==$('calcBb')) $('calcBb').value = k.bb;
+    $('calcReset').hidden = !k.manual;
+    $('calcSource').textContent = k.manual ? `Deneme hesabı. Evlerin güncel durumu: ${k.cur.yes} tam bağlantı, ${k.cur.bb} sadece omurga.`
+      : k.fromTeklif ? 'Henüz hiçbir eve katılım işlenmedi; teklifteki 17 ev esas alındı.' : 'Evlerin güncel durumundan alındı.';
+    const c = costFor(k.yes, k.bb);
+    $('pShare').textContent = c.N ? fmt2(c.share) : '—';
+    $('pBag').textContent = fmt2(BAG_EACH);
+    $('pFull').textContent = c.N ? fmt2(c.full) : '—';
+    $('pBb').textContent = c.N ? fmt2(c.bb) : '—';
+    $('pProject').textContent = c.N ? fmt2(c.project) : '—';
+    if (c.N>0 && c.N<28){
+      const nx = costFor(k.yes, k.bb+1);
+      $('pNext').textContent = `Bir ev daha katılırsa (${c.N+1} ev) omurga payı ${fmt2(nx.share)} olur; herkesin payı ${fmt2(c.share-nx.share)} düşer.`;
+      $('pNext').hidden = false;
+    } else $('pNext').hidden = true;
+    const rows = []; const from = Math.max(1, Math.min(c.N||17, 28) - 4);
+    for (let N=from; N<=28; N++){
+      const sh = OMURGA/N, prev = N>1 ? OMURGA/(N-1) : null;
+      rows.push(`<tr class="${N===c.N?'cur':N===c.N+1?'next':''}"><td>${N} ev${N===c.N?' · şu an':N===c.N+1?' · +1 ev':''}</td><td class="num">${fmt2(sh)}</td><td class="num">${fmt2(sh+BAG_EACH)}</td><td class="num">${prev?'−'+fmt2(prev-sh):'—'}</td></tr>`);
+    }
+    $('scenarioBody').innerHTML = rows.join('');
+    $('lengthBody').innerHTML = [40,45,60,70,75,80].map(L=>{ const net = FIXED_EACH + PER_M*L; return `<tr><td>${L} m</td><td class="num">${fmt2(net)}</td><td class="num">${fmt2(net*(1+KDV))}</td></tr>`; }).join('');
+    $('lengthNote').textContent = `Hesap: ev başına sabit ${fmt2(FIXED_EACH)} (klemp, kanca, klips, bina girişi, füzyon eki) + metre başına ${fmt2(PER_M)} (drop kablo ${fmt2(5.63)} + çekim ${fmt2(18.75)}), KDV hariç. Projedeki kablo boyları 40–80 m arası. Yukarıdaki fiyatlarda 17 evin ortalaması kullanıldı.`;
+    const itemRows = list => list.map(it=>`<tr><td class="pos">${esc(it[0])}</td><td>${esc(it[1])}</td><td class="num">${num(it[3])} ${esc(it[2])}</td><td class="num">${it[4]?fmt2(it[4]):'dahil'}</td><td class="num">${it[4]?fmt2(lineTotal(it)):'dahil'}</td></tr>`).join('');
+    const foot = net => `<tr><td></td><td>Toplam (KDV hariç)</td><td></td><td></td><td class="num">${fmt2(net)}</td></tr><tr><td></td><td>KDV %20</td><td></td><td></td><td class="num">${fmt2(net*KDV)}</td></tr><tr><td></td><td>Toplam (KDV dahil)</td><td></td><td></td><td class="num">${fmt2(net*(1+KDV))}</td></tr>`;
+    if (!$('itemsA').children.length){
+      $('itemsA').innerHTML = itemRows(ITEMS_A); $('footA').innerHTML = foot(NET_A);
+      $('itemsB').innerHTML = itemRows(ITEMS_B); $('footB').innerHTML = foot(NET_B);
+    }
+    $('sumA').textContent = fmt2(OMURGA); $('sumB').textContent = fmt2(BAG_ALL);
+  }
+  function suggestedFor(n, part){
+    const c = counts(); const was = house(n).p;
+    let yes=c.yes, bb=c.bb;
+    if (was==='yes') yes--; else if (was==='backbone') bb--;
+    if (part==='yes') yes++; else if (part==='backbone') bb++;
+    const r = costFor(yes, bb);
+    return part==='yes' ? r.full : part==='backbone' ? r.bb : 0;
+  }
+  function renderSuggest(){
+    if (ui.editing==null || ui.mode!=='owner') return;
+    const part = $('edPart').value, v = suggestedFor(ui.editing, part);
+    $('edSuggestText').textContent = v>0 ? `Güncel katılımla önerilen: ${fmt2(v)}` : 'Bu durum için katkı payı önerilmez.';
+    $('edSuggest').hidden = !(v>0);
+  }
+
+  function renderAll(){ renderMode(); renderMetrics(); renderPlan(); renderLists(); renderSettingsForm(); renderCosts(); renderPublishBar(); }
+
+  // ---------- modal ----------
+  let lastFocus = null;
+  function openModal(n){
+    const h = house(n); ui.editing = n; lastFocus = document.activeElement;
+    $('editTitle').textContent = `${aptLabel(n)} · ${Math.ceil(n/2)}. bina ${n%2?'sol':'sağ'} ev`;
+    const owner = ui.mode==='owner';
+    $('editEyebrow').textContent = owner ? 'EV DÜZENLE' : 'EV KAYDI';
+    $('viewRows').innerHTML =
+      `<div class="status-row"><span>Katılım</span><b><i style="background:${fillOf(h.p,h.p==='yes'?'none':h.pay)}"></i>${esc(P_LABEL[h.p])}</b></div>` +
+      (h.p==='no' || h.p==='pending' && h.pay==='none' ? '' : `<div class="status-row"><span>Ödeme</span><b><i style="background:${payLegend(h.pay)}"></i>${esc(PAY_LABEL[h.pay])}</b></div>`);
+    $('viewRows').hidden = owner;
+    if (owner){
+      const r = h.rec;
+      $('edPart').value = r.participation; $('edExpected').value = r.expected_amount ?? 0;
+      $('edPaid').value = r.paid_amount ?? 0; $('edNote').value = r.note || '';
+      renderSuggest();
+    }
+    $('modal').hidden = false; (owner ? $('edPart') : $('modalClose')).focus();
+  }
+  function closeModal(){ $('modal').hidden = true; ui.editing = null; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+
+  function setLive(kind, text){ $('liveDot').className = 'live-dot' + (kind==='ok'?'':kind==='wait'?' wait':' off'); $('liveText').textContent = text; }
+
+  // ---------- shared events ----------
+  $('search').addEventListener('input', e=>{ ui.q = e.target.value.trim(); renderPlan(); });
+  $('filter').addEventListener('change', e=>{ ui.filter = e.target.value; renderPlan(); });
+  $('sitePlan').addEventListener('click', e=>{ const p=e.target.closest('[data-apt]'); if(p) openModal(+p.dataset.apt); });
+  $('sitePlan').addEventListener('keydown', e=>{ const p=e.target.closest('[data-apt]'); if(p && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); openModal(+p.dataset.apt); } });
+  $('modalClose').addEventListener('click', closeModal);
+  $('modal').addEventListener('click', e=>{ if(e.target===$('modal')) closeModal(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('modal').hidden) closeModal(); });
+
+  renderAll();
+  setLive('ok','Son güncelleme');
+
+})();
+</script>
+
+</body>
+</html>
