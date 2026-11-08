@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yönetim · Yener Sitesi Fiber</title>
+<meta name="description" content="Yener Sitesi fiber altyapı projesi: 28 hanenin katılım ve ödeme durumu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body data-mode="admin">
+<main class="dashboard" id="top">
+  <header class="topbar">
+    <a class="brand" href="#top"><span class="brand-mark">Y<span>S</span></span><span>Yener Sitesi <b>Fiber Altyapı Yatırım Fonu</b></span></a>
+    <nav aria-label="Bölümler" class="hide-sm"><a href="#apartments">Evler</a><a href="#costs">Maliyet</a><a href="#finance">Tahsilat</a><a href="#activity">Geçmiş</a></nav>
+    <div class="top-actions"><a href="./" target="_blank" rel="noopener">Site sayfası ↗</a><button type="button" id="logout" hidden>Çıkış</button><span class="mode-chip">Yönetici</span></div>
+  </header>
+
+  <section class="login-wrap" id="loginView">
+    <form class="login-card" id="loginForm" autocomplete="on">
+      <p class="eyebrow">YÖNETİCİ GİRİŞİ</p>
+      <h1>Yener Sitesi Fiber</h1>
+      <p>Ev durumlarını ve ödemeleri buradan yönetirsin. Kaydettiğin her şey site sayfasına anında yansır.</p>
+      <label for="lgToken">GitHub anahtarı<input id="lgToken" type="password" autocomplete="off" required placeholder="github_pat_…"></label>
+      <label for="lgPass">Yönetici şifresi<input id="lgPass" type="password" autocomplete="current-password" required></label>
+      <label class="check" for="lgRemember"><input id="lgRemember" type="checkbox" checked> Bu cihazda beni hatırla</label>
+      <p class="login-err" id="loginErr" role="alert"></p>
+      <button class="primary" id="loginBtn">Giriş yap</button>
+    </form>
+  </section>
+
+  <div id="appView" hidden>
+  <section class="welcome">
+    <div>
+      <p class="eyebrow">YÖNETİCİ PANELİ</p>
+      <h1 id="projectTitle">Yener Sitesi Fiber Altyapı Yatırım Fonu</h1>
+      <p class="muted">Bir eve dokunarak katılımını ve ödemesini düzenle. Kaydettiğinde site sayfası da güncellenir.</p>
+    </div>
+    <div class="welcome-side" aria-live="polite">
+      <span class="live-dot" id="saveDot"></span><span id="saveText">Hazır</span>
+      <strong id="updatedAt">—</strong>
+      <small>Son kayıt zamanı</small>
+    </div>
+  </section>
+  <section class="metric-grid" aria-label="Özet">
+    <article class="metric featured">
+      <span>Katılacak ev</span>
+      <strong><span id="mJoin">0</span><small> / 28</small></strong>
+      <div class="meter"><i id="mMeter"></i></div>
+      <small id="mJoinNote">0 tam bağlantı · 0 sadece omurga</small>
+    </article>
+    <article class="metric"><span>Ödeme toplamı</span><strong id="mPaid">₺0</strong><small>Şu ana kadar toplanan</small></article>
+    <article class="metric"><span>Beklenen katkı</span><strong id="mExpected">₺0</strong><small>Katılacak evlerden</small></article>
+    <article class="metric"><span>Karar bekleyen</span><strong id="mPending">—</strong><small><span id="mNo">0</span> ev katılmayacak</small></article>
+  </section>
+
+  <section class="section-head" id="apartments">
+    <div><p class="eyebrow">EV KAYITLARI</p><h2>Evlerin durumu</h2></div>
+    <div class="tools">
+      <input id="search" aria-label="Kapı no ara" class="search" placeholder="Kapı no ara" inputmode="numeric">
+      <select id="filter" aria-label="Duruma göre süz">
+        <option value="all">Tüm evler</option>
+        <option value="yes">Katılacak</option>
+        <option value="backbone">Sadece omurga</option>
+        <option value="pending">Karar bekliyor</option>
+        <option value="no">Katılmayacak</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="site-plan-wrap">
+    <div class="site-plan-head">
+      <div>
+        <p class="eyebrow">YERLEŞİM PLANI</p>
+        <h3>14 bina · 28 müstakil ev</h3>
+        <p>Binanın sol veya sağ yarısına dokunarak o evin kaydını aç.</p>
+      </div>
+      <div class="site-legend">
+        <span><i class="lg-full"></i> Ödemesi tamam</span>
+        <span><i class="lg-partial"></i> Kısmi ödeme</span>
+        <span><i class="lg-yes"></i> Katılacak, ödeme yok</span>
+        <span><i class="lg-backbone"></i> Sadece omurga</span>
+        <span><i class="lg-no"></i> Katılmayacak</span>
+        <span><i class="lg-pending"></i> Karar bekliyor</span>
+      </div>
+    </div>
+    <svg class="site-plan" id="sitePlan" viewBox="90 10 640 1290" role="group" aria-label="14 bina ve 28 evin yerleşim planı"></svg>
+    <div class="site-plan-foot">Kapı numaraları sol sütundan başlar, her sütunda aşağıdan yukarı artar · Sağ en üst ev 28</div>
+  </section>
+
+  <section class="costs" id="costs">
+    <div class="section-head"><div><p class="eyebrow">MALİYET DAĞILIMI · ABLINK TEKLİFİ AB-2026-011-002</p><h2>Omurga, bağlantı ve kişi başı fiyat</h2></div></div>
+    <div class="cost-cards">
+      <div class="cost-card omurga"><span>Omurga (ortak hat) · KDV dahil</span><strong id="cOmurga">₺0</strong><small id="cOmurgaNet"></small></div>
+      <div class="cost-card bag"><span>Ev bağlantıları · teklifteki 17 ev · KDV dahil</span><strong id="cBag">₺0</strong><small id="cBagNet"></small></div>
+      <div class="cost-card"><span>Teklif genel toplamı · KDV dahil</span><strong id="cTotal">₺0</strong><small id="cTotalNet"></small></div>
+    </div>
+    <div class="calc">
+      <div class="calc-box">
+        <h3>Katılımcı sayısı</h3>
+        <p>Evlerin durumundan kendiliğinden alınır. Farklı bir sayıyı denemek için değiştirebilirsin; bu deneme kaydedilmez.</p>
+        <div class="calc-inputs">
+          <label for="calcYes">Tam bağlantı yapacak ev<input id="calcYes" type="number" min="0" max="28" step="1"></label>
+          <label for="calcBb">Sadece omurgaya katılacak ev<input id="calcBb" type="number" min="0" max="28" step="1"></label>
+          <button type="button" class="linkish" id="calcReset" hidden>Evlerin güncel durumuna dön</button>
+        </div>
+        <p class="cost-note" id="calcSource"></p>
+      </div>
+      <div class="calc-box">
+        <h3>Kişi başı fiyat</h3>
+        <p>Omurga, katılan herkese eşit bölünür. Bağlantı ücreti sadece eve kablo çekilenlere eklenir.</p>
+        <div class="price-row"><span>Omurga payı (kişi başı)</span><strong id="pShare">—</strong></div>
+        <div class="price-row"><span>Ev bağlantısı (ortalama, kişi başı)</span><strong id="pBag">—</strong></div>
+        <div class="price-row big"><span>Tam bağlantı fiyatı</span><strong id="pFull">—</strong></div>
+        <div class="price-row big red"><span>Sadece omurga fiyatı</span><strong id="pBb">—</strong></div>
+        <div class="price-row"><span>Bu sayılarla toplam proje maliyeti</span><strong id="pProject">—</strong></div>
+        <div class="next-hint" id="pNext" hidden></div>
+      </div>
+    </div>
+    <h3 class="cost-sub">Katılımcı sayısına göre omurga payı</h3>
+    <div class="table-wrap"><table class="cost-table">
+      <thead><tr><th>Omurgaya katılan ev</th><th class="num">Omurga payı</th><th class="num">Tam bağlantı fiyatı</th><th class="num">Bir öncekine göre düşüş</th></tr></thead>
+      <tbody id="scenarioBody"></tbody>
+    </table></div>
+    <p class="cost-note">Mavi satır şu anki durum, yeşil satır bir ev daha katılırsa oluşacak fiyat.</p>
+    <h3 class="cost-sub">Kablo boyuna göre ev bağlantısı</h3>
+    <div class="table-wrap"><table class="cost-table">
+      <thead><tr><th>Drop kablo boyu (yedek pay dahil)</th><th class="num">Bağlantı ücreti (KDV hariç)</th><th class="num">Bağlantı ücreti (KDV dahil)</th></tr></thead>
+      <tbody id="lengthBody"></tbody>
+    </table></div>
+    <p class="cost-note" id="lengthNote"></p>
+    <h3 class="cost-sub">Teklif kalemleri</h3>
+    <details class="items"><summary><span>A · Ana hat ve dağıtım (omurga)</span><b id="sumA"></b></summary><div class="table-wrap"><table class="cost-table"><thead><tr><th>Poz</th><th>İş kalemi</th><th class="num">Miktar</th><th class="num">Birim fiyat</th><th class="num">Toplam</th></tr></thead><tbody id="itemsA"></tbody><tfoot id="footA"></tfoot></table></div></details>
+    <details class="items"><summary><span>B · Ev bağlantıları (17 ev, havai drop)</span><b id="sumB"></b></summary><div class="table-wrap"><table class="cost-table"><thead><tr><th>Poz</th><th>İş kalemi</th><th class="num">Miktar</th><th class="num">Birim fiyat</th><th class="num">Toplam</th></tr></thead><tbody id="itemsB"></tbody><tfoot id="footB"></tfoot></table></div></details>
+    <p class="cost-note">Birim fiyatlar KDV hariçtir; KDV %20 ayrıca eklenir. Ödeme: %50 peşinat, %50 iş tesliminde. Teklif geçerliliği 17.11.2026.</p>
+  </section>
+
+  <section class="lower-grid" id="finance">
+    <article class="finance-panel">
+      <p class="eyebrow">MALİYET ÖZETİ</p>
+      <h2>Tahsilat durumu</h2>
+      <p class="muted">Güncel katılıma göre proje maliyeti ve toplanan para.</p>
+      <div class="finance-totals">
+        <div class="finance-total"><span>Güncel proje maliyeti</span><strong id="fTotal">₺0</strong></div>
+        <div class="finance-total"><span>Toplanan ödeme</span><strong id="fPaid">₺0</strong></div>
+        <div class="finance-total"><span>Kalan maliyet</span><strong id="fLeft">₺0</strong></div>
+      </div>
+    </article>
+    <article class="payment-panel">
+      <p class="eyebrow">TAHSİLAT EKLE</p>
+      <h2>Yeni ödeme kaydı</h2>
+      <p class="muted">Gelen ödemeyi ilgili eve işle. Evin toplam ödenen tutarına eklenir.</p>
+      <form class="settings-form" id="payForm">
+        <label for="payApt">Ev<select id="payApt"></select></label>
+        <label for="payAmount">Ödeme tutarı (₺)<input id="payAmount" type="number" min="1" step="any" required></label>
+        <label for="payDate">Ödeme tarihi<input id="payDate" type="date"></label>
+        <label for="payNote">Açıklama<input id="payNote" placeholder="İsteğe bağlı"></label>
+        <button class="primary" id="paySave" disabled>Ödemeyi kaydet</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="settings-grid">
+    <article class="finance-panel">
+      <p class="eyebrow">AYARLAR</p>
+      <h2>Proje adı</h2>
+      <form class="settings-form" id="settingsForm">
+        <label for="setTitle">Site sayfasında görünen başlık<input id="setTitle" required></label>
+        <button class="primary" id="setSave">Kaydet</button>
+      </form>
+    </article>
+    <article class="finance-panel">
+      <p class="eyebrow">GÜVENLİK</p>
+      <h2>Yönetici şifresi</h2>
+      <form class="settings-form" id="passForm">
+        <label for="passNew">Yeni şifre (en az 8 karakter)<input id="passNew" type="password" autocomplete="new-password" required minlength="8"></label>
+        <label for="passNew2">Yeni şifre (tekrar)<input id="passNew2" type="password" autocomplete="new-password" required minlength="8"></label>
+        <button class="primary" id="passSave">Şifreyi değiştir</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="history" id="activity">
+    <div class="section-head"><div><p class="eyebrow">İŞLEM KAYDI</p><h2>Son hareketler</h2></div></div>
+    <div id="activityList"><p class="muted">Henüz işlem kaydı yok.</p></div>
+    <div class="payments-history">
+      <h3>Ödeme hareketleri</h3>
+      <div id="paymentList"><p class="muted">Henüz ödeme kaydı eklenmedi.</p></div>
+    </div>
+  </section>
+  </div>
+  <footer><span>YENER SİTESİ FİBER ALTYAPI YATIRIM FONU</span><span>Yeniköy · Menteşe · Muğla</span></footer>
+</main>
+
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Kapat">×</button>
+    <p class="eyebrow">EV DÜZENLE</p>
+    <h2 id="editTitle"></h2>
+    <form id="editForm" class="status-rows">
+      <label for="edPart">Katılım durumu
+        <select id="edPart">
+          <option value="pending">Karar bekliyor</option>
+          <option value="yes">Katılacak (eve bağlantı dahil)</option>
+          <option value="backbone">Sadece omurga maliyetine katılacak</option>
+          <option value="no">Katılmayacak</option>
+        </select>
+      </label>
+      <label for="edExpected">Katkı payı (₺)<input id="edExpected" type="number" min="0" step="any"></label>
+      <div class="suggest"><span id="edSuggestText"></span><button type="button" class="linkish" id="edSuggest">Bunu yaz</button></div>
+      <label for="edPaid">Toplam ödenen (₺)<input id="edPaid" type="number" min="0" step="any"></label>
+      <label for="edNote">Not (sadece yönetici görür)<textarea id="edNote"></textarea></label>
+      <button class="primary" id="edSave">Değişiklikleri kaydet</button>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
