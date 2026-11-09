@@ -391,6 +391,21 @@
   }));
   $('calcReset').addEventListener('click', ()=>{ calc.yes=null; calc.bb=null; renderCosts(); });
 
+  // Telefona aktarma: anahtar QR içinde #t= ile gelir; adres çubuğundan hemen silinir
+  (() => {
+    const m = location.hash.match(/^#t=([^&]+)/);
+    if (m){ try { $('lgToken').value = decodeURIComponent(m[1]); } catch {} history.replaceState(null, '', location.pathname); setTimeout(()=>$('lgPass').focus(), 50); }
+  })();
+  let qrTimer;
+  $('qrBtn').addEventListener('click', ()=>{
+    const box = $('qrBox');
+    if (!box.hidden){ box.hidden = true; $('qrNote').hidden = true; $('qrBtn').textContent = 'QR kodu göster'; clearTimeout(qrTimer); return; }
+    if (typeof QRCode === 'undefined'){ toast('QR kodu oluşturulamadı. Sayfayı yenileyip tekrar dene.'); return; }
+    box.innerHTML = ''; new QRCode(box, {text: location.origin + location.pathname + '#t=' + encodeURIComponent(TOKEN), width:240, height:240, correctLevel: QRCode.CorrectLevel.M});
+    box.hidden = false; $('qrNote').hidden = false; $('qrBtn').textContent = 'QR kodu gizle';
+    clearTimeout(qrTimer); qrTimer = setTimeout(()=>{ box.hidden = true; box.innerHTML=''; $('qrNote').hidden = true; $('qrBtn').textContent = 'QR kodu göster'; }, 120000);
+  });
+
   $('payApt').innerHTML = Array.from({length:28},(_,i)=>`<option value="${i+1}">${esc(aptLabel(i+1))}</option>`).join('');
   $('payDate').value = today();
 

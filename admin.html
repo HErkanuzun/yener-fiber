@@ -207,6 +207,17 @@
     </article>
   </section>
 
+  <section class="settings-grid">
+    <article class="finance-panel">
+      <p class="eyebrow">TELEFONDAN GİRİŞ</p>
+      <h2>Telefona aktar</h2>
+      <p class="muted">Düğmeye bas, çıkan QR kodu telefonunun kamerasıyla okut. Yönetici sayfası telefonda GitHub anahtarı dolu olarak açılır; sadece yönetici şifreni yazarsın.</p>
+      <div class="settings-form"><button type="button" class="primary" id="qrBtn">QR kodu göster</button></div>
+      <div id="qrBox" class="qr-box" hidden></div>
+      <p class="cost-note" id="qrNote" hidden>QR kodu 2 dakika sonra kendiliğinden kapanır. Kimseye gösterme; anahtarını içerir.</p>
+    </article>
+  </section>
+
   <section class="history" id="activity">
     <div class="section-head"><div><p class="eyebrow">İŞLEM KAYDI</p><h2>Son hareketler</h2></div></div>
     <div id="activityList"><p class="muted">Henüz işlem kaydı yok.</p></div>
@@ -242,6 +253,7 @@
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
