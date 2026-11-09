@@ -304,7 +304,7 @@
     DATA = data; PRIV = priv; PASS = pass;
     PRIV.apts ||= {}; PRIV.payments ||= []; PRIV.activity ||= [];
     if (remember){ store.set('yf_token', TOKEN); store.set('yf_pass', PASS); }
-    $('loginView').hidden = true; $('appView').hidden = false; $('logout').hidden = false;
+    $('loginView').hidden = true; $('appView').hidden = false; $('logout').hidden = false; $('qrTop').hidden = false;
     setSave('ok', 'Son kayıt: ' + when(DATA.updated));
     renderAll();
   }
@@ -396,6 +396,7 @@
     const m = location.hash.match(/^#t=([^&]+)/);
     if (m){ try { $('lgToken').value = decodeURIComponent(m[1]); } catch {} history.replaceState(null, '', location.pathname); setTimeout(()=>$('lgPass').focus(), 50); }
   })();
+  $('qrTop').addEventListener('click', ()=>{ if ($('qrBox').hidden) $('qrBtn').click(); $('qrBox').scrollIntoView({behavior:'smooth', block:'center'}); });
   let qrTimer;
   $('qrBtn').addEventListener('click', ()=>{
     const box = $('qrBox');
