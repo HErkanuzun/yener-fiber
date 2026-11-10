@@ -20,6 +20,8 @@
     .sort((a,b)=> a.x-b.x || (a.x===327 ? a.y-b.y : b.y-a.y));
   const aptLabel = n => `Kapı No ${n}`;
   const P_LABEL = {pending:'Karar bekliyor', yes:'Katılacak', backbone:'Sadece omurga maliyetine katılacak', no:'Katılmayacak'};
+  const SUB_LABEL = {new:'Yeni abone olacak', tt:'Zaten Türk Telekom abonesi', switch:"Başka operatörden Türk Telekom'a geçecek", none:'İnternet almayacak, sadece evine kadar bağlatacak'};
+  const SUB_SHORT = {new:'Yeni abone', tt:'Zaten TT abonesi', switch:"TT'ye geçecek", none:'Sadece bağlantı'};
   const PAY_LABEL = {full:'Ödemesi tamamlandı', partial:'Ödemenin bir kısmı yapıldı', none:'Henüz ödeme yok'};
   const payCat = r => { const p=+r.paid_amount||0, e=+r.expected_amount||0; return p<=0 ? 'none' : (p>=e ? 'full' : 'partial'); };
   const fillOf = (p,pay) => p==='no' ? 'var(--h-no)' : p==='backbone' ? 'var(--h-backbone)'
@@ -53,10 +55,10 @@
   }
 
   // ---------- veri erişimi ----------
-  function rec(n){ const r = PRIV && PRIV.apts[n]; return {participation:'pending', expected_amount:0, paid_amount:0, note:'', ...(r||{})}; }
+  function rec(n){ const r = PRIV && PRIV.apts[n]; return {participation:'pending', expected_amount:0, paid_amount:0, note:'', subscription:'', ...(r||{})}; }
   function house(n){
-    if (MODE==='admin' && PRIV){ const r = rec(n); return {n, p:r.participation, pay:payCat(r), rec:r}; }
-    const h = (DATA && DATA.public && DATA.public.houses[n]) || {}; return {n, p:h.p||'pending', pay:h.pay||'none'};
+    if (MODE==='admin' && PRIV){ const r = rec(n); return {n, p:r.participation, pay:payCat(r), sub:r.subscription||'', rec:r}; }
+    const h = (DATA && DATA.public && DATA.public.houses[n]) || {}; return {n, p:h.p||'pending', pay:h.pay||'none', sub:h.s||''};
   }
   function totals(){
     if (!(MODE==='admin' && PRIV)) return {paid:+(DATA?.public?.paid)||0, expected:+(DATA?.public?.expected)||0};
@@ -79,7 +81,7 @@
 
   function buildPublic(){
     const houses = {};
-    for (let n=1;n<=28;n++){ const h=house(n); if (h.p!=='pending' || h.pay!=='none') houses[n] = {p:h.p, pay:h.pay}; }
+    for (let n=1;n<=28;n++){ const h=house(n); if (h.p!=='pending' || h.pay!=='none' || h.sub){ houses[n] = {p:h.p, pay:h.pay}; if (h.sub) houses[n].s = h.sub; } }
     return {title: title(), houses};   // tutarlar herkese açık kısma yazılmaz
   }
 
@@ -117,6 +119,9 @@
     if ($('mPaid')) $('mPaid').textContent = fmt(t.paid);
     if ($('mExpected')) $('mExpected').textContent = fmt(t.expected);
     $('mPending').textContent = 28-yes-bb-no; $('mNo').textContent = no;
+    const sc = {new:0, tt:0, switch:0, none:0, unk:0};
+    hs.forEach(h=>{ if (h.p==='yes'){ if (SUB_SHORT[h.sub]) sc[h.sub]++; else sc.unk++; } });
+    if ($('subSummary')) $('subSummary').innerHTML = ['new','tt','switch','none'].map(k=>`<span><b>${sc[k]}</b> ${esc(SUB_SHORT[k])}</span>`).join('') + (sc.unk ? `<span class="muted"><b>${sc.unk}</b> belirtilmedi</span>` : '');
     $('projectTitle').textContent = title();
     $('updatedAt').textContent = DATA ? when(DATA.updated) : '—';
   }
@@ -248,11 +253,13 @@
       const r = h.rec;
       $('edPart').value = r.participation; $('edExpected').value = r.expected_amount ?? 0;
       $('edPaid').value = r.paid_amount ?? 0; $('edNote').value = r.note || '';
+      $('edSub').value = r.subscription || '';
       renderSuggest();
     } else {
       $('viewRows').innerHTML =
         `<div class="status-row"><span>Katılım</span><b><i style="background:${fillOf(h.p,h.p==='yes'?'none':h.pay)}"></i>${esc(P_LABEL[h.p])}</b></div>` +
-        (h.p==='no' || (h.p==='pending' && h.pay==='none') ? '' : `<div class="status-row"><span>Ödeme</span><b><i style="background:${payLegend(h.pay)}"></i>${esc(PAY_LABEL[h.pay])}</b></div>`);
+        (h.p==='no' || (h.p==='pending' && h.pay==='none') ? '' : `<div class="status-row"><span>Ödeme</span><b><i style="background:${payLegend(h.pay)}"></i>${esc(PAY_LABEL[h.pay])}</b></div>`) +
+        (h.sub ? `<div class="status-row"><span>Abonelik</span><b>${esc(SUB_LABEL[h.sub])}</b></div>` : '');
     }
     $('modal').hidden = false; (MODE==='admin' ? $('edPart') : $('modalClose')).focus();
   }
@@ -352,7 +359,7 @@
   $('editForm').addEventListener('submit', async e=>{
     e.preventDefault(); if (ui.editing==null) return;
     const n = ui.editing, part = $('edPart').value;
-    const body = {participation:part, expected_amount:+$('edExpected').value||0, paid_amount:+$('edPaid').value||0, note:$('edNote').value.trim()};
+    const body = {participation:part, expected_amount:+$('edExpected').value||0, paid_amount:+$('edPaid').value||0, subscription:$('edSub').value, note:$('edNote').value.trim()};
     const ok = await commit(P => { P.apts[n] = body; }, `${aptLabel(n)}: ${P_LABEL[part]}`, 'Ev kaydı kaydedildi.');
     if (ok) closeModal();
   });

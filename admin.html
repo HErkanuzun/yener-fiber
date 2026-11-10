@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 <meta name="robots" content="noindex,nofollow">
 </head>
 <body data-mode="admin">
@@ -55,6 +55,11 @@
     <article class="metric"><span>Ödeme toplamı</span><strong id="mPaid">₺0</strong><small>Şu ana kadar toplanan</small></article>
     <article class="metric"><span>Beklenen katkı</span><strong id="mExpected">₺0</strong><small>Katılacak evlerden</small></article>
     <article class="metric"><span>Karar bekleyen</span><strong id="mPending">—</strong><small><span id="mNo">0</span> ev katılmayacak</small></article>
+  </section>
+
+  <section class="sub-strip" aria-label="Abonelik durumu">
+    <span class="eyebrow">KATILACAK EVLERİN ABONELİK DURUMU</span>
+    <div id="subSummary" class="sub-items"></div>
   </section>
 
   <section class="section-head" id="apartments">
@@ -244,6 +249,15 @@
           <option value="no">Katılmayacak</option>
         </select>
       </label>
+      <label for="edSub">Abonelik durumu
+        <select id="edSub">
+          <option value="">Belirtilmedi</option>
+          <option value="new">Yeni abone olacak</option>
+          <option value="tt">Zaten Türk Telekom abonesi</option>
+          <option value="switch">Başka operatörden Türk Telekom'a geçecek</option>
+          <option value="none">İnternet almayacak, sadece evine kadar bağlatacak</option>
+        </select>
+      </label>
       <label for="edExpected">Katkı payı (₺)<input id="edExpected" type="number" min="0" step="any"></label>
       <div class="suggest"><span id="edSuggestText"></span><button type="button" class="linkish" id="edSuggest">Bunu yaz</button></div>
       <label for="edPaid">Toplam ödenen (₺)<input id="edPaid" type="number" min="0" step="any"></label>
@@ -254,6 +268,6 @@
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
