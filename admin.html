@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 <meta name="robots" content="noindex,nofollow">
 </head>
 <body data-mode="admin">
@@ -47,18 +47,22 @@
   </section>
   <section class="metric-grid" aria-label="Özet">
     <article class="metric featured">
-      <span>Katılacak ev</span>
+      <span>Katılacak ev (toplam)</span>
       <strong><span id="mJoin">0</span><small> / 28</small></strong>
       <div class="meter"><i id="mMeter"></i></div>
-      <small id="mJoinNote">0 tam bağlantı · 0 sadece omurga</small>
+      <small>Eve kadar bağlanacak + sadece omurga</small>
     </article>
-    <article class="metric"><span>Ödeme toplamı</span><strong id="mPaid">₺0</strong><small>Şu ana kadar toplanan</small></article>
-    <article class="metric"><span>Beklenen katkı</span><strong id="mExpected">₺0</strong><small>Katılacak evlerden</small></article>
-    <article class="metric"><span>Karar bekleyen</span><strong id="mPending">—</strong><small><span id="mNo">0</span> ev katılmayacak</small></article>
+    <article class="metric"><span>Eve kadar bağlanacak</span><strong id="mYes">0</strong><small>Omurga + evine kablo çekilecek</small></article>
+    <article class="metric"><span>Sadece omurgaya katılacak</span><strong id="mBb">0</strong><small>Evine şimdilik kablo çekilmeyecek</small></article>
+    <article class="metric"><span>Katılmayacak</span><strong id="mNo">0</strong><small id="mPendingNote">Karar bekleyen yok</small></article>
+  </section>
+  <section class="metric-grid two money-row" aria-label="Ödemeler">
+    <article class="metric"><span>Ödeme toplamı</span><strong id="mPaid">₺0</strong><small>Şu ana kadar toplanan · sadece sen görürsün</small></article>
+    <article class="metric"><span>Beklenen katkı</span><strong id="mExpected">₺0</strong><small>Katılacak evlerden · sadece sen görürsün</small></article>
   </section>
 
   <section class="sub-strip" aria-label="Abonelik durumu">
-    <span class="eyebrow">KATILACAK EVLERİN ABONELİK DURUMU</span>
+    <span class="eyebrow">EVE KADAR BAĞLANACAK EVLERİN ABONELİK DURUMU</span>
     <div id="subSummary" class="sub-items"></div>
   </section>
 
@@ -268,6 +272,6 @@
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

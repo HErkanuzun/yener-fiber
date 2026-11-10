@@ -115,10 +115,11 @@
     const yes = hs.filter(h=>h.p==='yes').length, bb = hs.filter(h=>h.p==='backbone').length, no = hs.filter(h=>h.p==='no').length;
     const t = totals();
     $('mJoin').textContent = yes+bb; $('mMeter').style.width = `${(yes+bb)/28*100}%`;
-    $('mJoinNote').textContent = `${yes} tam bağlantı · ${bb} sadece omurga`;
+    $('mYes').textContent = yes; $('mBb').textContent = bb;
     if ($('mPaid')) $('mPaid').textContent = fmt(t.paid);
     if ($('mExpected')) $('mExpected').textContent = fmt(t.expected);
-    $('mPending').textContent = 28-yes-bb-no; $('mNo').textContent = no;
+    const pend = 28-yes-bb-no; $('mNo').textContent = no;
+    $('mPendingNote').textContent = pend ? `${pend} ev karar bekliyor` : 'Karar bekleyen yok';
     const sc = {new:0, tt:0, switch:0, none:0, unk:0};
     hs.forEach(h=>{ if (h.p==='yes'){ if (SUB_SHORT[h.sub]) sc[h.sub]++; else sc.unk++; } });
     if ($('subSummary')) $('subSummary').innerHTML = ['new','tt','switch','none'].map(k=>`<span><b>${sc[k]}</b> ${esc(SUB_SHORT[k])}</span>`).join('') + (sc.unk ? `<span class="muted"><b>${sc.unk}</b> belirtilmedi</span>` : '');

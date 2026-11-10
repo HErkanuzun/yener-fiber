@@ -236,3 +236,4 @@ footer{border-top:1px solid var(--line);color:var(--faint);letter-spacing:.08em;
 .sub-strip .eyebrow{margin:0}
 .sub-items{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--label)}
 .sub-items b{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums;margin-right:3px}
+.money-row{margin-top:14px}
