@@ -20,8 +20,8 @@
     .sort((a,b)=> a.x-b.x || (a.x===327 ? a.y-b.y : b.y-a.y));
   const aptLabel = n => `Kapı No ${n}`;
   const P_LABEL = {pending:'Karar bekliyor', yes:'Katılacak', backbone:'Sadece omurga maliyetine katılacak', no:'Katılmayacak'};
-  const SUB_LABEL = {new:'Yeni abone olacak', tt:'Zaten Türk Telekom abonesi', switch:"Başka operatörden Türk Telekom'a geçecek", none:'İnternet almayacak, sadece evine kadar bağlatacak'};
-  const SUB_SHORT = {new:'Yeni abone', tt:'Zaten TT abonesi', switch:"TT'ye geçecek", none:'Sadece bağlantı'};
+  const SUB_LABEL = {new:'Yeni abone olacak', tt:'Zaten Türk Telekom abonesi', switch:"Başka operatörden Türk Telekom'a geçecek", none:'İnternet almayacak, sadece evine kadar bağlatacak', never:'Hiç internet almayacak'};
+  const SUB_SHORT = {new:'Yeni abone', tt:'Zaten TT abonesi', switch:"TT'ye geçecek", none:'Sadece bağlantı', never:'Hiç internet almayacak'};
   const PAY_LABEL = {full:'Ödemesi tamamlandı', partial:'Ödemenin bir kısmı yapıldı', none:'Henüz ödeme yok'};
   const payCat = r => { const p=+r.paid_amount||0, e=+r.expected_amount||0; return p<=0 ? 'none' : (p>=e ? 'full' : 'partial'); };
   const fillOf = (p,pay) => p==='no' ? 'var(--h-no)' : p==='backbone' ? 'var(--h-backbone)'
@@ -120,9 +120,9 @@
     if ($('mExpected')) $('mExpected').textContent = fmt(t.expected);
     const pend = 28-yes-bb-no; $('mNo').textContent = no;
     $('mPendingNote').textContent = pend ? `${pend} ev karar bekliyor` : 'Karar bekleyen yok';
-    const sc = {new:0, tt:0, switch:0, none:0, unk:0};
-    hs.forEach(h=>{ if (h.p==='yes'){ if (SUB_SHORT[h.sub]) sc[h.sub]++; else sc.unk++; } });
-    if ($('subSummary')) $('subSummary').innerHTML = ['new','tt','switch','none'].map(k=>`<span><b>${sc[k]}</b> ${esc(SUB_SHORT[k])}</span>`).join('') + (sc.unk ? `<span class="muted"><b>${sc.unk}</b> belirtilmedi</span>` : '');
+    const sc = {new:0, tt:0, switch:0, none:0, unk:0}; let never = 0;
+    hs.forEach(h=>{ if (h.p==='yes'){ if (sc[h.sub]!==undefined && h.sub) sc[h.sub]++; else sc.unk++; } if (h.p==='no' && h.sub==='never') never++; });
+    if ($('subSummary')) $('subSummary').innerHTML = ['new','tt','switch','none'].map(k=>`<span><b>${sc[k]}</b> ${esc(SUB_SHORT[k])}</span>`).join('') + (sc.unk ? `<span class="muted"><b>${sc.unk}</b> belirtilmedi</span>` : '') + (never ? `<span class="sub-never">Katılmayanlardan <b>${never}</b> ev hiç internet almayacak</span>` : '');
     $('projectTitle').textContent = title();
     $('updatedAt').textContent = DATA ? when(DATA.updated) : '—';
   }
