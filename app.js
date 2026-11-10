@@ -15,9 +15,9 @@
   const today = () => new Date().toISOString().slice(0,10);
   const when = iso => iso ? new Date(iso).toLocaleString('tr-TR',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
 
-  // Kapı numarası: sol sütun aşağıdan yukarı (1–10), orta sütun (11–18), sağ sütun (19–28); her binada soldaki ev tek numara
+  // Kapı numarası yatık S şeklinde: sol sütun aşağıdan yukarı (1–10), orta sütun yukarıdan aşağı (11–18), sağ sütun aşağıdan yukarı (19–28); her binada soldaki ev tek numara
   const BUILDINGS = [{x:545,y:24,w:165,h:96,r:-1.5},{x:110,y:24,w:165,h:96,r:0},{x:327,y:167,w:165,h:96,r:0},{x:545,y:310,w:165,h:96,r:1.5},{x:110,y:310,w:165,h:96,r:-1.5},{x:327,y:453,w:165,h:96,r:-1.5},{x:545,y:596,w:165,h:96,r:0},{x:110,y:596,w:165,h:96,r:1.5},{x:327,y:739,w:165,h:96,r:1.5},{x:545,y:882,w:165,h:96,r:-1.5},{x:110,y:882,w:165,h:96,r:0},{x:327,y:1025,w:165,h:96,r:0},{x:545,y:1168,w:165,h:96,r:1.5},{x:110,y:1168,w:165,h:96,r:-1.5}]
-    .sort((a,b)=> a.x-b.x || b.y-a.y);
+    .sort((a,b)=> a.x-b.x || (a.x===327 ? a.y-b.y : b.y-a.y));
   const aptLabel = n => `Kapı No ${n}`;
   const P_LABEL = {pending:'Karar bekliyor', yes:'Katılacak', backbone:'Sadece omurga maliyetine katılacak', no:'Katılmayacak'};
   const PAY_LABEL = {full:'Ödemesi tamamlandı', partial:'Ödemenin bir kısmı yapıldı', none:'Henüz ödeme yok'};
