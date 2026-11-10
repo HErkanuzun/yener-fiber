@@ -57,8 +57,10 @@
   // ---------- veri erişimi ----------
   function rec(n){ const r = PRIV && PRIV.apts[n]; return {participation:'pending', expected_amount:0, paid_amount:0, note:'', subscription:'', ...(r||{})}; }
   function house(n){
-    if (MODE==='admin' && PRIV){ const r = rec(n); return {n, p:r.participation, pay:payCat(r), sub:r.subscription||'', rec:r}; }
-    const h = (DATA && DATA.public && DATA.public.houses[n]) || {}; return {n, p:h.p||'pending', pay:h.pay||'none', sub:h.s||''};
+    // Katılmayan (siyah) evler kendiliğinden "Hiç internet almayacak" sayılır
+    if (MODE==='admin' && PRIV){ const r = rec(n); return {n, p:r.participation, pay:payCat(r), sub: r.participation==='no' ? 'never' : (r.subscription||''), rec:r}; }
+    const h = (DATA && DATA.public && DATA.public.houses[n]) || {}; const p = h.p||'pending';
+    return {n, p, pay:h.pay||'none', sub: p==='no' ? 'never' : (h.s||'')};
   }
   function totals(){
     if (!(MODE==='admin' && PRIV)) return {paid:+(DATA?.public?.paid)||0, expected:+(DATA?.public?.expected)||0};
@@ -254,7 +256,7 @@
       const r = h.rec;
       $('edPart').value = r.participation; $('edExpected').value = r.expected_amount ?? 0;
       $('edPaid').value = r.paid_amount ?? 0; $('edNote').value = r.note || '';
-      $('edSub').value = r.subscription || '';
+      $('edSub').value = r.participation==='no' ? 'never' : (r.subscription || '');
       renderSuggest();
     } else {
       $('viewRows').innerHTML =
@@ -360,11 +362,15 @@
   $('editForm').addEventListener('submit', async e=>{
     e.preventDefault(); if (ui.editing==null) return;
     const n = ui.editing, part = $('edPart').value;
-    const body = {participation:part, expected_amount:+$('edExpected').value||0, paid_amount:+$('edPaid').value||0, subscription:$('edSub').value, note:$('edNote').value.trim()};
+    const body = {participation:part, expected_amount:+$('edExpected').value||0, paid_amount:+$('edPaid').value||0, subscription: part==='no' ? 'never' : $('edSub').value, note:$('edNote').value.trim()};
     const ok = await commit(P => { P.apts[n] = body; }, `${aptLabel(n)}: ${P_LABEL[part]}`, 'Ev kaydı kaydedildi.');
     if (ok) closeModal();
   });
-  $('edPart').addEventListener('change', renderSuggest);
+  $('edPart').addEventListener('change', ()=>{
+    if ($('edPart').value==='no') $('edSub').value = 'never';
+    else if ($('edSub').value==='never') $('edSub').value = '';
+    renderSuggest();
+  });
   $('edSuggest').addEventListener('click', ()=>{ const v = suggestedFor(ui.editing, $('edPart').value); if (v>0) $('edExpected').value = Math.round(v*100)/100; });
 
   $('payAmount').addEventListener('input', ()=>{ $('paySave').disabled = ui.busy || !$('payAmount').value; });
