@@ -231,3 +231,4 @@ footer{border-top:1px solid var(--line);color:var(--faint);letter-spacing:.08em;
 .split-legend{justify-content:flex-start;margin-top:8px;max-width:none}
 .qr-box{margin-top:16px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px;width:fit-content}
 .qr-box img,.qr-box canvas{display:block;max-width:100%}
+.metric-grid.two{grid-template-columns:repeat(2,1fr)}

@@ -116,9 +116,7 @@
     "p": "yes",
     "pay": "partial"
    }
-  },
-  "paid": 66807,
-  "expected": 105424
+  }
  },
  "private": {
   "alg": "PBKDF2-SHA256+AES-GCM",

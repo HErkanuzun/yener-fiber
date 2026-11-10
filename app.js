@@ -80,8 +80,7 @@
   function buildPublic(){
     const houses = {};
     for (let n=1;n<=28;n++){ const h=house(n); if (h.p!=='pending' || h.pay!=='none') houses[n] = {p:h.p, pay:h.pay}; }
-    const t = totals();
-    return {title: title(), houses, paid:t.paid, expected:t.expected};
+    return {title: title(), houses};   // tutarlar herkese açık kısma yazılmaz
   }
 
   // ---------- GitHub ----------
@@ -115,7 +114,8 @@
     const t = totals();
     $('mJoin').textContent = yes+bb; $('mMeter').style.width = `${(yes+bb)/28*100}%`;
     $('mJoinNote').textContent = `${yes} tam bağlantı · ${bb} sadece omurga`;
-    $('mPaid').textContent = fmt(t.paid); $('mExpected').textContent = fmt(t.expected);
+    if ($('mPaid')) $('mPaid').textContent = fmt(t.paid);
+    if ($('mExpected')) $('mExpected').textContent = fmt(t.expected);
     $('mPending').textContent = 28-yes-bb-no; $('mNo').textContent = no;
     $('projectTitle').textContent = title();
     $('updatedAt').textContent = DATA ? when(DATA.updated) : '—';
