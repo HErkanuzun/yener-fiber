@@ -101,7 +101,7 @@
   </section>
 
   <section class="costs" id="costs">
-    <div class="section-head"><div><p class="eyebrow">MALİYET DAĞILIMI · ABLINK TEKLİFİ AB-2026-011-002</p><h2>Omurga, bağlantı ve kişi başı fiyat</h2></div></div>
+    <div class="section-head"><div><p class="eyebrow">MALİYET DAĞILIMI · ABLINK TEKLİFİ <span id="tekNo">—</span></p><h2>Omurga, bağlantı ve kişi başı fiyat</h2></div></div>
     <div class="cost-cards">
       <div class="cost-card omurga"><span>Omurga (ortak hat) · KDV dahil</span><strong id="cOmurga">₺0</strong><small id="cOmurgaNet"></small></div>
       <div class="cost-card bag"><span>Ev bağlantıları · teklifteki 17 ev · KDV dahil</span><strong id="cBag">₺0</strong><small id="cBagNet"></small></div>
@@ -168,7 +168,7 @@
       <tbody id="allItemsBody"></tbody>
       <tfoot id="allItemsFoot"></tfoot>
     </table></div>
-    <p class="cost-note">Pay, KDV hariç toplam (124.380,77 ₺) içindeki oranıdır. "Dahil" yazan kalemler (ölçüm, etiketleme, as-built) ayrıca ücretlendirilmemiştir.</p>
+    <p class="cost-note">Pay, KDV hariç toplam (<span id="tekNet">—</span>) içindeki oranıdır. "Dahil" yazan kalemler (ölçüm, etiketleme, as-built) ayrıca ücretlendirilmemiştir.</p>
   </section>
 
   <section class="lower-grid" id="finance">
@@ -205,6 +205,19 @@
         <button class="primary" id="setSave">Kaydet</button>
       </form>
     </article>
+    <article class="finance-panel">
+      <p class="eyebrow">TEKLİF</p>
+      <h2>Teklifi güncelle</h2>
+      <p class="muted">Şu an kullanılan teklif: <b id="tekCur">—</b>. Yeni teklif dosyasını (.json) seç; kalemler ve fiyatlar şifreli olarak kaydedilir, site sayfasında görünmez.</p>
+      <form class="settings-form" id="tekForm">
+        <label for="tekFile">Teklif dosyası<input id="tekFile" type="file" accept=".json,application/json" required></label>
+        <p class="cost-note" id="tekPreview" hidden></p>
+        <button class="primary" id="tekSave" disabled>Teklifi kaydet</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="settings-grid">
     <article class="finance-panel">
       <p class="eyebrow">GÜVENLİK</p>
       <h2>Yönetici şifresi</h2>

@@ -170,6 +170,8 @@
     const NA=netA(), NB=netB(), KDV=T().kdv, OM=omurga(), BA=bagAll(), BE=bagEach();
     $('cOmurga').textContent = fmt2(OM); $('cOmurgaNet').textContent = `KDV hariç ${fmt2(NA)} · ${T().A.length} kalem`;
     $('cBag').textContent = fmt2(BA); $('cBagNet').textContent = `KDV hariç ${fmt2(NB)} · ev başı ort. ${fmt2(BE)}`;
+    if ($('tekNo')) $('tekNo').textContent = T().no || '—';
+    if ($('tekCur')) $('tekCur').textContent = `${T().no || 'adı yok'} · KDV dahil ${fmt2(OM+BA)}`;
     $('cTotal').textContent = fmt2(OM+BA); $('cTotalNet').textContent = `KDV hariç ${fmt2(NA+NB)} · %50 peşinat ${fmt2((OM+BA)/2)}`;
     const k = calcCounts();
     if (document.activeElement!==$('calcYes')) $('calcYes').value = k.yes;
@@ -216,6 +218,7 @@
     $('gMal').textContent = fmt2(mal); $('gMalP').textContent = `KDV hariç toplamın ${pct(mal)}'i · KDV dahil ${fmt2(mal*(1+KDV))}`;
     $('gIsc').textContent = fmt2(isc); $('gIscP').textContent = `KDV hariç toplamın ${pct(isc)}'i · KDV dahil ${fmt2(isc*(1+KDV))}`;
     $('gKdv').textContent = fmt2(kdv);
+    if ($('tekNet')) $('tekNet').textContent = fmt2(total);
     $('gTop').textContent = fmt2(gross); $('gTopP').textContent = `KDV hariç ${fmt2(total)}`;
     $('gSplit').innerHTML = `<i class="s-mal" style="width:${mal/gross*100}%" title="Malzeme"></i><i class="s-isc" style="width:${isc/gross*100}%" title="İşçilik"></i><i class="s-kdv" style="width:${kdv/gross*100}%" title="KDV"></i>`;
     const groups = {}; items.forEach(x=>{ const g = GROUP_OF[x.it[0]] || 'ek'; groups[g] = (groups[g]||0) + x.net; });
@@ -300,7 +303,7 @@
     del(k){ try { localStorage.removeItem(k); } catch {} },
   };
   function setSave(kind, text){ $('saveDot').className = 'live-dot' + (kind==='ok'?'':kind==='wait'?' wait':' off'); $('saveText').textContent = text; }
-  function setBusy(b){ ['setSave','edSave','passSave','paySave'].forEach(id=>{ if($(id)) $(id).disabled = b || (id==='paySave' && !$('payAmount').value); }); }
+  function setBusy(b){ ['setSave','edSave','passSave','paySave','tekSave'].forEach(id=>{ if($(id)) $(id).disabled = b || (id==='paySave' && !$('payAmount').value) || (id==='tekSave' && !pendingTeklif); }); }
 
   async function unlock(token, pass, remember){
     TOKEN = token.trim();
@@ -389,6 +392,32 @@
     const m = () => {}; m.title = t;
     await commit(m, 'Proje adı güncellendi', 'Proje adı kaydedildi.');
   });
+  // Teklif güncelleme: yönetici yeni teklif dosyasını (.json) seçer, şifreli kısma yazılır
+  let pendingTeklif = null;
+  function checkTeklif(t){
+    const okItem = it => Array.isArray(it) && it.length>=5 && typeof it[0]==='string' && isFinite(+it[3]) && isFinite(+it[4]);
+    if (!t || !Array.isArray(t.A) || !Array.isArray(t.B) || !t.A.length || !t.B.length || !t.A.every(okItem) || !t.B.every(okItem)) throw 0;
+    if (!(+t.kdv>=0) || !(+t.bag_houses>0) || !(+t.per_m>=0) || !(+t.drop_m>0)) throw 0;
+    return {...t, kdv:+t.kdv, bag_houses:+t.bag_houses, per_m:+t.per_m, drop_m:+t.drop_m, A:t.A.map(it=>[it[0],it[1],it[2],+it[3],+it[4]]), B:t.B.map(it=>[it[0],it[1],it[2],+it[3],+it[4]])};
+  }
+  $('tekFile').addEventListener('change', async e=>{
+    pendingTeklif = null; $('tekSave').disabled = true; $('tekPreview').hidden = true;
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const t = checkTeklif(JSON.parse(await f.text()));
+      const net = [...t.A, ...t.B].reduce((s,it)=>s+lineTotal(it),0);
+      pendingTeklif = t; $('tekSave').disabled = ui.busy;
+      $('tekPreview').textContent = `${t.no || 'Teklif'}: ${t.A.length + t.B.length} kalem · KDV hariç ${fmt2(net)} · KDV dahil ${fmt2(net*(1+t.kdv))} · ${t.bag_houses} ev`;
+      $('tekPreview').hidden = false;
+    } catch { toast('Bu dosya geçerli bir teklif dosyası değil.'); e.target.value = ''; }
+  });
+  $('tekForm').addEventListener('submit', async e=>{
+    e.preventDefault(); if (!pendingTeklif) return;
+    const t = pendingTeklif;
+    const ok = await commit(P => { P.teklif = t; }, `Teklif güncellendi: ${t.no || 'yeni teklif'}`, 'Teklif kaydedildi. Maliyetler yeni teklife göre hesaplanıyor.');
+    if (ok){ pendingTeklif = null; $('tekFile').value = ''; $('tekPreview').hidden = true; $('tekSave').disabled = true; }
+  });
+
   $('passForm').addEventListener('submit', async e=>{
     e.preventDefault();
     const a = $('passNew').value, b = $('passNew2').value;
